@@ -14,7 +14,7 @@
       <v-tab-item v-for="item in items" :key="item">
         <v-card color="basil" flat>
           <v-card-text>
-            <commute-table />
+            <card-group />
           </v-card-text>
         </v-card>
       </v-tab-item>
@@ -22,10 +22,10 @@
   </v-card>
 </template>
 <script>
-import CommuteTable from './components/CommuteTable'
+import CardGroup from './components/CardGroup'
 export default {
   name: 'Commute',
-  components: { CommuteTable },
+  components: { CardGroup },
   data() {
     return {
       tab: null,

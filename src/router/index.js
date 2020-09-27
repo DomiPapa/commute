@@ -28,6 +28,18 @@ export const constantRoutes = [
         name: 'Commute'
       }
     ]
+  },
+  {
+    path: '/detail',
+    component: Layout,
+    redirect: '/detail/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/detail/index'),
+        name: 'Detail'
+      }
+    ]
   }
 ]
 
