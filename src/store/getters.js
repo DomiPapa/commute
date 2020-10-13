@@ -1,4 +1,4 @@
 const getters = {
-  commuteItems: state => state.app.commuteItems
+  currentItemId: state => state.bus_info.currentItemId
 }
 export default getters

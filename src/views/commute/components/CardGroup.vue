@@ -1,12 +1,13 @@
 <template>
   <div>
+    <error-alert :alert="alert" />
     <v-item-group active-class="primary">
       <v-container>
         <v-row>
           <v-col v-for="(item, index) in iterms" :key="index" cols="12" md="4">
             <v-item>
               <v-card color="#fff" class="pa-2">
-                <v-card-title class="headline d-flex">
+                <v-card-title class="headline d-flex ml-2">
                   <span>{{ item.time }}</span>
                   <span class="pl-4">{{ item.loc[0] }}</span>
                   <span class="pl-4">
@@ -17,23 +18,14 @@
                 <v-divider :inset="inset"></v-divider>
                 <v-card-text class="ml-2 d-flex justify-space-between">
                   <div class="d-flex flex-column text-center">
-                    <span>最大</span>
+                    <span>总座位数</span>
                     <span>{{ item.payload }}</span>
                   </div>
                   <div
-                    v-if="item.status"
                     class="d-flex flex-column text-center"
                     @click="checkDetail(item)"
                   >
-                    <span>您的位置</span>
-                    <span>{{ item.rank }}</span>
-                  </div>
-                  <div
-                    v-else
-                    class="d-flex flex-column text-center"
-                    @click="checkDetail(item)"
-                  >
-                    <span>已排</span>
+                    <span>剩余座位</span>
                     <span>{{ item.rank }}</span>
                   </div>
                   <div class="ma-1">
@@ -43,7 +35,7 @@
                       color="error"
                       @click="cancelRank(item)"
                     >
-                      取消排队
+                      取消预约
                     </v-btn>
                     <v-btn
                       class=""
@@ -51,7 +43,7 @@
                       @click="handleRank(item)"
                       v-else
                     >
-                      排队
+                      预约
                     </v-btn>
                   </div>
                 </v-card-text>
@@ -61,32 +53,24 @@
         </v-row>
       </v-container>
     </v-item-group>
-    <v-dialog v-model="dialog" width="800px">
+    <v-dialog v-model="order_dialog" width="800px">
       <v-card>
         <v-card-title class="">
-          填写排队人信息
+          填写乘车人信息
         </v-card-title>
         <v-container>
           <v-row class="mx-2">
-            <v-col class="align-center justify-space-between" cols="12">
-              <v-row align="center" class="mr-0">
-                <v-avatar size="40px" class="mx-3">
-                  <img
-                    src="//ssl.gstatic.com/s2/oz/images/sge/grey_silhouette.png"
-                    alt=""
-                  />
-                </v-avatar>
-                <v-text-field placeholder="姓名"></v-text-field>
-              </v-row>
-            </v-col>
-            <v-col cols="6">
+            <v-col cols="12">
               <v-text-field
-                prepend-icon="mdi-account-card-details-outline"
-                placeholder="单位"
+                prepend-icon="mdi-account"
+                placeholder="姓名"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
-              <v-text-field placeholder="职位"></v-text-field>
+            <v-col cols="12">
+              <v-text-field
+                prepend-icon="mdi-briefcase"
+                placeholder="单位"
+              ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field
@@ -95,83 +79,121 @@
                 placeholder="电话号码"
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
-              <v-text-field
-                prepend-icon="mdi-text"
-                placeholder="其他备注"
-              ></v-text-field>
-            </v-col>
           </v-row>
         </v-container>
         <v-card-actions class="justify-end">
-          <v-btn text color="primary" @click="dialog = false">
+          <v-btn text color="primary" @click="order_dialog = false">
             取消
           </v-btn>
-          <v-btn text @click="handleSubmit">提交</v-btn>
+          <v-btn text @click="handleOrderSubmit">提交</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="cancel_dialog" max-width="290">
+      <v-card>
+        <v-card-title class="headline">
+          您确定要取消预约吗？
+        </v-card-title>
+
+        <v-card-text v-if="current_item">
+          <v-list dense>
+            <v-list-item>
+              <v-list-item-content>时间:</v-list-item-content>
+              <v-list-item-content class="align-end">
+                {{ current_item.time }}
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item>
+              <v-list-item-content>往返地:</v-list-item-content>
+              <v-list-item-content class="align-end">
+                {{ current_item.loc[0] }} — {{ current_item.loc[1] }}
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item>
+              <v-list-item-content>剩余座位:</v-list-item-content>
+              <v-list-item-content class="align-end">
+                {{ current_item.rank }}
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="normal" @click="cancel_dialog = false">
+            返回
+          </v-btn>
+          <v-btn color="error" @click="handleCancelSubmit">
+            确定取消
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
 </template>
 <script>
+import store from '@/store'
+import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
 export default {
   name: 'CardGroup',
+  components: {
+    ErrorAlert
+  },
   data: () => {
     return {
       mdiArrowRightBold,
       inset: false,
-      dialog: false,
-      iterms: [
-        {
-          time: '8:00',
-          loc: ['达州基地', '采气厂'],
-          payload: '20',
-          rank: '5',
-          status: false
-        },
-        {
-          time: '10:00',
-          loc: ['达州基地', '采气厂'],
-          payload: '20',
-          rank: '5',
-          status: true
-        },
-        {
-          time: '12:00',
-          loc: ['达州基地', '采气厂'],
-          payload: '20',
-          rank: '5',
-          status: false
-        },
-        {
-          time: '14:00',
-          loc: ['达州基地', '采气厂'],
-          payload: '20',
-          rank: '5',
-          status: false
-        }
-      ]
+      order_dialog: false,
+      cancel_dialog: false,
+      iterms: [],
+      current_item: null,
+      alert: {
+        toggle: false,
+        message: ''
+      }
     }
   },
   methods: {
     handleRank(item) {
       console.log('rank')
-      console.log(item)
-      this.dialog = true
+      this.current_item = item
+      this.order_dialog = true
     },
     cancelRank(item) {
-      console.log(item)
       console.log('cancelRank')
+      this.current_item = item
+      this.cancel_dialog = true
     },
     checkDetail(item) {
-      console.log(item)
+      store.commit('bus_info/SET_CURRENT_ITEM_ID', item.id)
       this.$router.push('/detail')
     },
-    handleSubmit() {
-      console.log('handleSubmit')
-      this.dialog = false
+    handleOrderSubmit() {
+      console.log('handleOrderSubmit')
+      this.refreshBusInfo()
+      this.order_dialog = false
+    },
+    handleCancelSubmit() {
+      console.log('handleCancelSubmit')
+      this.refreshBusInfo()
+      this.cancel_dialog = false
+    },
+    async refreshBusInfo() {
+      try {
+        const { data } = await store.dispatch('bus_info/fetchBusInfo')
+        this.iterms = data
+      } catch (error) {
+        console.log('create阶段捕捉的错误' + error)
+        this.alert.toggle = true
+        this.alert.message = '未能从服务器拉取数据'
+      }
     }
+  },
+  created() {
+    this.refreshBusInfo()
   }
 }
 </script>

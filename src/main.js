@@ -16,3 +16,5 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+document.title = '基地至管理中心考斯特乘车预约'
