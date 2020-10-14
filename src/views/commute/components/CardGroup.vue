@@ -60,29 +60,34 @@
         </v-card-title>
         <v-container>
           <v-row class="mx-2">
-            <v-col cols="12">
-              <v-text-field
-                prepend-icon="mdi-account"
-                placeholder="姓名"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                prepend-icon="mdi-briefcase"
-                placeholder="单位"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                type="tel"
-                prepend-icon="mdi-phone"
-                placeholder="电话号码"
-              ></v-text-field>
-            </v-col>
+            <v-form ref="form">
+              <v-col cols="12">
+                <v-text-field
+                  prepend-icon="mdi-account"
+                  placeholder="姓名"
+                  v-model="passenger.name"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  prepend-icon="mdi-briefcase"
+                  placeholder="单位"
+                  v-model="passenger.unit"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  type="tel"
+                  prepend-icon="mdi-phone"
+                  placeholder="电话号码"
+                  v-model="passenger.phone"
+                ></v-text-field>
+              </v-col>
+            </v-form>
           </v-row>
         </v-container>
         <v-card-actions class="justify-end">
-          <v-btn text color="primary" @click="order_dialog = false">
+          <v-btn text color="primary" @click="closeOrderSubmit">
             取消
           </v-btn>
           <v-btn text @click="handleOrderSubmit">提交</v-btn>
@@ -137,6 +142,7 @@
 import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
+import { updateOrderSubmit, updateOrderCancel } from '@/api/rank-info.js'
 export default {
   name: 'CardGroup',
   components: {
@@ -149,6 +155,11 @@ export default {
       order_dialog: false,
       cancel_dialog: false,
       iterms: [],
+      passenger: {
+        name: '',
+        unit: '',
+        phone: ''
+      },
       current_item: null,
       alert: {
         toggle: false,
@@ -173,11 +184,28 @@ export default {
     },
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
+      const tempData = Object.assign({}, this.passenger)
+      tempData.uid = store.getters.uid
+      tempData.id = this.current_item.id
+      updateOrderSubmit(tempData).then(() => {
+        console.log('預約成功')
+      })
       this.refreshBusInfo()
+      this.$refs.form.reset()
+      this.order_dialog = false
+    },
+    closeOrderSubmit() {
+      this.$refs.form.reset()
       this.order_dialog = false
     },
     handleCancelSubmit() {
       console.log('handleCancelSubmit')
+      const tempData = {}
+      tempData.uid = store.getters.uid
+      tempData.id = this.current_item.id
+      updateOrderCancel(tempData).then(() => {
+        console.log('取消成功')
+      })
       this.refreshBusInfo()
       this.cancel_dialog = false
     },

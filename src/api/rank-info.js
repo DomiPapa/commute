@@ -7,3 +7,17 @@ export function fetchRankInfo(id) {
     params: { id }
   })
 }
+export function updateOrderSubmit(data) {
+  return request({
+    url: '/order-submit',
+    method: 'post',
+    data
+  })
+}
+export function updateOrderCancel(data) {
+  return request({
+    url: '/order-cancel',
+    method: 'post',
+    data
+  })
+}
