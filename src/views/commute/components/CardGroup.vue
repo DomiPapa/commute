@@ -8,27 +8,28 @@
             <v-item>
               <v-card color="#fff" class="pa-2">
                 <v-card-title class="headline d-flex ml-2">
-                  <span>{{ item.time }}</span>
-                  <span class="pl-4">{{ item.loc[0] }}</span>
+                  <span>{{ item.departureTime }}</span>
+                  <span class="pl-4">{{ item.departure }}</span>
                   <span class="pl-4">
                     <v-icon>{{ mdiArrowRightBold }}</v-icon>
                   </span>
-                  <span class="pl-4">{{ item.loc[1] }}</span>
+                  <span class="pl-4">{{ item.arrival }}</span>
                 </v-card-title>
                 <v-divider :inset="inset"></v-divider>
                 <v-card-text class="ml-2 d-flex justify-space-between">
                   <div class="d-flex flex-column text-center">
                     <span>总座位数</span>
-                    <span>{{ item.payload }}</span>
+                    <span>{{ item.capacity }}</span>
                   </div>
                   <div
                     class="d-flex flex-column text-center"
                     @click="checkDetail(item)"
                   >
                     <span>剩余座位</span>
-                    <span>{{ item.rank }}</span>
+                    <span>{{ item.remaining }}</span>
                   </div>
                   <div class="ma-1">
+                    <!--
                     <v-btn
                       v-if="item.status"
                       depressed
@@ -43,6 +44,10 @@
                       @click="handleRank(item)"
                       v-else
                     >
+                      预约
+                    </v-btn>
+                    -->
+                    <v-btn class="" color="primary" @click="handleRank(item)">
                       预约
                     </v-btn>
                   </div>
@@ -148,6 +153,7 @@ export default {
   components: {
     ErrorAlert
   },
+  props: { reservation: Object },
   data: () => {
     return {
       mdiArrowRightBold,
@@ -188,7 +194,7 @@ export default {
       tempData.uid = store.getters.uid
       tempData.id = this.current_item.id
       updateOrderSubmit(tempData).then(() => {
-        console.log('預約成功')
+        console.log('预约成功')
       })
       this.refreshBusInfo()
       this.$refs.form.reset()

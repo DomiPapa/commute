@@ -42,9 +42,10 @@ export default {
   created() {
     void (async () => {
       try {
-        const { data } = await store.dispatch({
-          type: 'rank_info/fetchRankInfo',
-          id: store.getters.currentItemId
+        const { data } = await store.dispatch('rank_info/fetchRankInfo', {
+          sid: store.getters.currentItemId,
+          startTime: store.getters.reservationDateInfo.startTime,
+          endTime: store.getters.reservationDateInfo.endTime
         })
         this.rankInfos = data
       } catch (error) {

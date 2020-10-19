@@ -1,22 +1,26 @@
 import { fetchRankInfo } from '@/api/rank-info'
 
 const state = {
-  currentRankItems: ''
+  currentRankItems: '',
+  reservationDateInfo: {}
 }
 
 const mutations = {
   SET_RANK_INFO_ITEMS: (state, data) => {
     state.currentRankItems = data
+  },
+  SET_RESERVATION_DATE_INFO: (state, data) => {
+    state.reservationDateInfo = data
   }
 }
 
 const actions = {
-  fetchRankInfo({ commit }, id) {
+  fetchRankInfo({ commit }, prams) {
     return new Promise((resolve, reject) => {
-      fetchRankInfo(id)
+      fetchRankInfo(prams)
         .then(response => {
           const { data } = response
-          if (!data) {
+          if (Array.isArray(data)) {
             reject('未获取到数据')
           }
           commit('SET_RANK_INFO_ITEMS', data)

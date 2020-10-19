@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function fetchBusInfo() {
   return request({
-    url: '/bus-info',
+    url: '/shuttle/findAll',
     method: 'get'
   })
 }

@@ -1,10 +1,10 @@
 import request from '@/utils/request'
 
-export function fetchRankInfo(id) {
+export function fetchRankInfo(query) {
   return request({
-    url: '/rank-info',
+    url: '/reservation/findAllReservations',
     method: 'get',
-    params: { id }
+    params: query
   })
 }
 export function updateOrderSubmit(data) {

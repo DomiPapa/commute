@@ -7,6 +7,6 @@ module.exports = {
   devServer: {
     host: 'localhost',
     port: 3000,
-    proxy: 'http://10.75.240.238:38080/app/mock/22/'
+    proxy: 'http://10.80.12.10:8008'
   }
 }
