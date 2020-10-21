@@ -4,7 +4,7 @@
     <v-item-group active-class="primary">
       <v-container>
         <v-row>
-          <v-col v-for="(item, index) in iterms" :key="index" cols="12" md="4">
+          <v-col v-for="(item, index) in items" :key="index" cols="12" md="4">
             <v-item>
               <v-card color="#fff" class="pa-2">
                 <v-card-title class="headline d-flex ml-2">
@@ -77,7 +77,7 @@
                 <v-text-field
                   prepend-icon="mdi-briefcase"
                   placeholder="单位"
-                  v-model="passenger.unit"
+                  v-model="passenger.department"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
@@ -110,21 +110,21 @@
             <v-list-item>
               <v-list-item-content>时间:</v-list-item-content>
               <v-list-item-content class="align-end">
-                {{ current_item.time }}
+                {{ current_item.departureTime }}
               </v-list-item-content>
             </v-list-item>
 
             <v-list-item>
               <v-list-item-content>往返地:</v-list-item-content>
               <v-list-item-content class="align-end">
-                {{ current_item.loc[0] }} — {{ current_item.loc[1] }}
+                {{ current_item.departure }} — {{ current_item.arrival }}
               </v-list-item-content>
             </v-list-item>
 
             <v-list-item>
               <v-list-item-content>剩余座位:</v-list-item-content>
               <v-list-item-content class="align-end">
-                {{ current_item.rank }}
+                {{ current_item.remaining }}
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -160,7 +160,7 @@ export default {
       inset: false,
       order_dialog: false,
       cancel_dialog: false,
-      iterms: [],
+      items: [],
       passenger: {
         name: '',
         unit: '',
@@ -218,7 +218,7 @@ export default {
     async refreshBusInfo() {
       try {
         const { data } = await store.dispatch('bus_info/fetchBusInfo')
-        this.iterms = data
+        this.items = data
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
         this.alert.toggle = true
