@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import store from '@/store'
 
 export function fetchRankInfo(query) {
   return request({
@@ -9,15 +10,14 @@ export function fetchRankInfo(query) {
 }
 export function updateOrderSubmit(data) {
   return request({
-    url: '/order-submit',
+    url: '/reservation/add/' + store.getters.userId,
     method: 'post',
     data
   })
 }
 export function updateOrderCancel(data) {
   return request({
-    url: '/order-cancel',
-    method: 'post',
-    data
+    url: '/reservation/cancel/' + data.id,
+    method: 'post'
   })
 }

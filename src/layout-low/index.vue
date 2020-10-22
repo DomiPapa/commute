@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="bg">
     <v-main>
       <app-main />
     </v-main>
@@ -19,3 +19,8 @@ export default {
   data: () => ({})
 }
 </script>
+<style lang="scss" scoped>
+.bg {
+  background-color: #e1f5fe;
+}
+</style>

@@ -9,8 +9,8 @@ const mutations = {
   SET_BUS_INFO_ITEMS: (state, data) => {
     state.infoItems = data
   },
-  SET_CURRENT_ITEM_ID: (state, data) => {
-    state.currentItemId = data
+  SET_CURRENT_ITEM_ID: (state, id) => {
+    state.currentItemId = id
   }
 }
 
@@ -19,7 +19,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       fetchBusInfo()
         .then(response => {
-          const { data } = response
+          const { data } = response.data
           if (!data) {
             reject('未获取到数据')
           }
@@ -31,6 +31,9 @@ const actions = {
           reject(error)
         })
     })
+  },
+  setCurrentItemId({ commit }, id) {
+    commit('SET_CURRENT_ITEM_ID', id)
   }
 }
 

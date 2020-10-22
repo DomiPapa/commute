@@ -1,23 +1,36 @@
-import { fetchUserInfo } from '@/api/user'
+import { fetchUserLoginInfo, fetchUserReservationInfo } from '@/api/user'
+import { Array } from 'core-js'
 
 const state = {
-  userId: '2069621466776250',
-  userName: '张博'
+  userId: '2014672533791258',
+  userName: '徐聪',
+  phone: '',
+  department: '',
+  shuttleInfos: []
 }
 
 const mutations = {
-  SET_USER_ID: (state, data) => {
-    state.userId = data
+  SET_USER_ID: (state, userId) => {
+    state.userId = userId
   },
-  SET_USER_NAME: (state, data) => {
-    state.userName = data
+  SET_USER_NAME: (state, userName) => {
+    state.userName = userName
+  },
+  SET_USER_PHONE: (state, phone) => {
+    state.phone = phone
+  },
+  SET_USER_DEPARTMENT: (state, department) => {
+    state.department = department
+  },
+  SET_USER_SHUTTLE_INFOS: (state, shuttleInfos) => {
+    state.shuttleInfos = shuttleInfos
   }
 }
 
 const actions = {
-  fetchUserInfo({ commit }, params) {
+  fetchUserLoginInfo({ commit }, params) {
     return new Promise((resolve, reject) => {
-      fetchUserInfo(params)
+      fetchUserLoginInfo(params)
         .then(response => {
           const { result } = response
           const { userId, userName } = result
@@ -26,7 +39,34 @@ const actions = {
           resolve(result)
         })
         .catch(error => {
-          console.log('用户信息错误')
+          reject(error)
+        })
+    })
+  },
+  fetchUserReservationInfo({ commit }, params) {
+    return new Promise((resolve, reject) => {
+      fetchUserReservationInfo(params)
+        .then(response => {
+          const { data } = response.data
+          if (!(data && Array.isArray(data))) {
+            reject('用户订车数据异常')
+          }
+          if (data.length != 0) {
+            // 用戶有訂車數據
+            commit('SET_USER_PHONE', data[0].phone)
+            commit('SET_USER_DEPARTMENT', data[0].department)
+          }
+          let shuttleInfos = []
+          data.forEach(el => {
+            let elObj = {}
+            elObj.shuttleId = el.shuttleId
+            elObj.orderId = el.id
+            shuttleInfos.push(elObj)
+          })
+          commit('SET_USER_SHUTTLE_INFOS', shuttleInfos)
+          resolve(data)
+        })
+        .catch(error => {
           reject(error)
         })
     })

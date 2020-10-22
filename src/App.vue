@@ -7,47 +7,6 @@
 <script>
 import * as dd from 'dingtalk-jsapi'
 import store from '@/store'
-try {
-  dd.ready(function() {
-    // dd.ready参数为回调函数，在环境准备就绪时触发，jsapi的调用需要保证在该回调函数触发后调用，否则无效。
-    try {
-      alert('进入try块了')
-      dd.device.notification.alert({
-        message: '钉钉环境到位了',
-        title: '提示', //可传空
-        buttonName: '收到'
-      })
-      dd.runtime.permission.requestAuthCode({
-        corpId: 'ding0a9fbc06157f3c1a35c2f4657eb6378f',
-        onSuccess: function(result) {
-          alert('corpId对了')
-          alert(result.code)
-          //通过corpId，code获取userid
-          console.log(result.code)
-          store
-            .dispatch('user/fetchUserInfo', {
-              authCode: result.code
-            })
-            .then(res => {
-              alert('userId请求成功')
-              alert(res.userId)
-            })
-            .catch(alert('请求失败'))
-        },
-        onFail: function(err) {
-          console.log(JSON.stringify(err))
-          alert('corpID失败了')
-          alert(err)
-        }
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  })
-} catch (error) {
-  console.log(error)
-  console.log('钉钉环境未到位')
-}
 
 export default {
   name: 'App',
@@ -55,6 +14,66 @@ export default {
     key() {
       return this.$route.path
     }
+  },
+  methods: {
+    handleDD() {
+      let that = this
+      // 钉钉处理逻辑
+      try {
+        dd.ready(function() {
+          // dd.ready参数为回调函数，在环境准备就绪时触发，jsapi的调用需要保证在该回调函数触发后调用，否则无效。
+          try {
+            alert('进入try块了')
+            dd.device.notification.alert({
+              message: '钉钉环境到位了',
+              title: '提示', //可传空
+              buttonName: '收到'
+            })
+            dd.runtime.permission.requestAuthCode({
+              corpId: 'ding0a9fbc06157f3c1a35c2f4657eb6378f',
+              onSuccess: function(result) {
+                alert('corpId对了')
+                alert(result.code)
+                //通过corpId，code获取userid
+                console.log(result.code)
+                // 设定一下用户信息
+                that.$store
+                  .dispatch('user/fetchUserLoginInfo', {
+                    authCode: result.code
+                  })
+                  .then(res => {
+                    alert('userId请求成功')
+                    alert(res.userId)
+                  })
+                  .catch(alert('请求失败'))
+              },
+              onFail: function(err) {
+                console.log(JSON.stringify(err))
+                alert('corpID失败了')
+                alert(err)
+              }
+            })
+          } catch (e) {
+            console.log(e)
+          }
+        })
+      } catch (error) {
+        console.log(error)
+        console.log('钉钉环境未到位')
+      }
+    }
+  },
+  created() {
+    // 处理钉钉获取逻辑
+    this.handleDD()
+    // 刷一下时间
+    this.$store.dispatch('rank_info/handleDate')
+    // 获取一下用户订单信息
+    this.$store.dispatch('user/fetchUserReservationInfo', {
+      uid: store.getters.userId,
+      startTime: store.getters.reservationDateInfo.startTime,
+      endTime: store.getters.reservationDateInfo.endTime
+    })
   }
 }
 </script>

@@ -4,7 +4,12 @@
     <v-item-group active-class="primary">
       <v-container>
         <v-row>
-          <v-col v-for="(item, index) in items" :key="index" cols="12" md="4">
+          <v-col
+            v-for="(item, index) in resItems"
+            :key="index"
+            cols="12"
+            md="4"
+          >
             <v-item>
               <v-card color="#fff" class="pa-2">
                 <v-card-title class="headline d-flex ml-2">
@@ -29,14 +34,16 @@
                     <span>{{ item.remaining }}</span>
                   </div>
                   <div class="ma-1">
-                    <!--
                     <v-btn
-                      v-if="item.status"
+                      v-if="item.orderId"
                       depressed
                       color="error"
                       @click="cancelRank(item)"
                     >
                       取消预约
+                    </v-btn>
+                    <v-btn v-else-if="item.remaining === 0" disabled>
+                      已约满
                     </v-btn>
                     <v-btn
                       class=""
@@ -44,10 +51,6 @@
                       @click="handleRank(item)"
                       v-else
                     >
-                      预约
-                    </v-btn>
-                    -->
-                    <v-btn class="" color="primary" @click="handleRank(item)">
                       预约
                     </v-btn>
                   </div>
@@ -144,6 +147,7 @@
   </div>
 </template>
 <script>
+// import * as dd from 'dingtalk-jsapi'
 import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
@@ -153,7 +157,6 @@ export default {
   components: {
     ErrorAlert
   },
-  props: { reservation: Object },
   data: () => {
     return {
       mdiArrowRightBold,
@@ -162,7 +165,7 @@ export default {
       cancel_dialog: false,
       items: [],
       passenger: {
-        name: store.getters.userName,
+        name: '',
         department: '',
         phone: ''
       },
@@ -171,6 +174,22 @@ export default {
         toggle: false,
         message: ''
       }
+    }
+  },
+  computed: {
+    resItems() {
+      let shuttleInfos = store.getters.shuttleInfos
+      let resArr = []
+      this.items.forEach(el => {
+        let eObj = Object.assign({}, el)
+        shuttleInfos.forEach(sEl => {
+          if (sEl.shuttleId === eObj.id) {
+            eObj.orderId = sEl.orderId
+          }
+        })
+        resArr.push(eObj)
+      })
+      return resArr
     }
   },
   methods: {
@@ -185,49 +204,69 @@ export default {
       this.cancel_dialog = true
     },
     checkDetail(item) {
-      store.commit('bus_info/SET_CURRENT_ITEM_ID', item.id)
+      this.$store.dispatch('bus_info/setCurrentItemId', item.id)
       this.$router.push('/detail')
     },
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
-      const tempData = Object.assign({}, this.passenger)
-      tempData.userId = store.getters.userId
-      tempData.id = this.current_item.id
-      updateOrderSubmit(tempData).then(() => {
-        console.log('预约成功')
+      const tempData = Object.assign(
+        { shuttleId: this.current_item.id },
+        this.passenger
+      )
+      updateOrderSubmit(tempData).then(res => {
+        console.log(res.data.msg)
+        /*
+        if (res.data.code === 10000) {
+          dd.device.notification.alert({
+            message: '预约成功',
+            title: '', //可传空
+            buttonName: '收到'
+          })
+        }
+        */
       })
       this.refreshBusInfo()
-      this.$refs.form.reset()
+      // this.$refs.form.reset()
       this.order_dialog = false
     },
     closeOrderSubmit() {
-      this.$refs.form.reset()
+      // this.$refs.form.reset()
       this.order_dialog = false
     },
     handleCancelSubmit() {
       console.log('handleCancelSubmit')
       const tempData = {}
-      tempData.uid = store.getters.uid
-      tempData.id = this.current_item.id
-      updateOrderCancel(tempData).then(() => {
-        console.log('取消成功')
+      // 需要取消的订单号
+      tempData.id = this.current_item.orderId
+      updateOrderCancel(tempData).then(res => {
+        console.log(res.data.msg)
       })
       this.refreshBusInfo()
       this.cancel_dialog = false
     },
     async refreshBusInfo() {
       try {
-        const { data } = await store.dispatch('bus_info/fetchBusInfo')
-        this.items = data
+        this.items = await store.dispatch('bus_info/fetchBusInfo')
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
         this.alert.toggle = true
         this.alert.message = '未能从服务器拉取数据'
       }
+      // 刷一下时间
+      this.$store.dispatch('rank_info/handleDate')
+      // 刷一下用户订单信息
+      this.$store.dispatch('user/fetchUserReservationInfo', {
+        uid: store.getters.userId,
+        startTime: store.getters.reservationDateInfo.startTime,
+        endTime: store.getters.reservationDateInfo.endTime
+      })
     }
   },
   created() {
     this.refreshBusInfo()
+    this.passenger.name = store.getters.userName
+    this.passenger.department = store.getters.department || ''
+    this.passenger.phone = store.getters.phone || ''
   }
 }
 </script>
