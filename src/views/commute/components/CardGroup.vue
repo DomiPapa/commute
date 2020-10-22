@@ -162,8 +162,8 @@ export default {
       cancel_dialog: false,
       items: [],
       passenger: {
-        name: '',
-        unit: '',
+        name: store.getters.userName,
+        department: '',
         phone: ''
       },
       current_item: null,
@@ -191,7 +191,7 @@ export default {
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
       const tempData = Object.assign({}, this.passenger)
-      tempData.uid = store.getters.uid
+      tempData.userId = store.getters.userId
       tempData.id = this.current_item.id
       updateOrderSubmit(tempData).then(() => {
         console.log('预约成功')

@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 
-export function fetchUserInfo(query) {
+export function fetchUserInfo(data) {
   return request({
     url: '/login',
-    method: 'get',
-    params: query
+    method: 'post',
+    params: data
   })
 }

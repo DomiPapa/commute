@@ -1,24 +1,29 @@
 import { fetchUserInfo } from '@/api/user'
 
 const state = {
-  uid: '111'
+  userId: '2069621466776250',
+  userName: '张博'
 }
 
 const mutations = {
   SET_USER_ID: (state, data) => {
-    state.uid = data
+    state.userId = data
+  },
+  SET_USER_NAME: (state, data) => {
+    state.userName = data
   }
 }
 
 const actions = {
-  fetchUserInfo({ commit }) {
+  fetchUserInfo({ commit }, params) {
     return new Promise((resolve, reject) => {
-      fetchUserInfo()
+      fetchUserInfo(params)
         .then(response => {
-          const { data } = response
-          console.log('获得用户信息了' + data)
-          commit('SET_USER_ID', data)
-          resolve(data)
+          const { result } = response
+          const { userId, userName } = result
+          commit('SET_USER_ID', userId)
+          commit('SET_USER_NAME', userName)
+          resolve(result)
         })
         .catch(error => {
           console.log('用户信息错误')
