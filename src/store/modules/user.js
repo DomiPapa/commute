@@ -2,8 +2,12 @@ import { fetchUserLoginInfo, fetchUserReservationInfo } from '@/api/user'
 import { Array } from 'core-js'
 
 const state = {
+  /*
   userId: '2014672533791258',
   userName: '徐聪',
+  */
+  userId: '',
+  userName: '',
   phone: '',
   department: '',
   shuttleInfos: []
