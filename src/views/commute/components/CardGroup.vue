@@ -253,7 +253,7 @@ export default {
       try {
         this.items = await store.dispatch('bus_info/fetchBusInfo')
         // 刷一下时间
-        await this.$store.dispatch('rank_info/handleDate')
+        this.$store.dispatch('rank_info/handleDate')
         // 刷一下用户订单信息
         await this.$store.dispatch('user/fetchUserReservationInfo', {
           uid: store.getters.userId,
