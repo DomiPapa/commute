@@ -164,6 +164,7 @@ export default {
       order_dialog: false,
       cancel_dialog: false,
       items: [],
+      resItems: [],
       passenger: {
         name: '',
         department: '',
@@ -176,8 +177,8 @@ export default {
       }
     }
   },
-  computed: {
-    resItems() {
+  methods: {
+    computedResItems() {
       let shuttleInfos = store.getters.shuttleInfos
       let resArr = []
       this.items.forEach(el => {
@@ -190,9 +191,7 @@ export default {
         resArr.push(eObj)
       })
       return resArr
-    }
-  },
-  methods: {
+    },
     handleRank(item) {
       console.log('rank')
       this.current_item = item
@@ -210,7 +209,7 @@ export default {
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
       const tempData = Object.assign(
-        { shuttleId: this.current_item.id },
+        { shuttleId: this.current_item.id, userId: store.getters.userId },
         this.passenger
       )
       updateOrderSubmit(tempData).then(res => {
@@ -224,8 +223,9 @@ export default {
           })
         }
         */
+        this.refreshBusInfo()
       })
-      this.refreshBusInfo()
+
       // this.$refs.form.reset()
       this.order_dialog = false
     },
@@ -235,36 +235,43 @@ export default {
     },
     handleCancelSubmit() {
       console.log('handleCancelSubmit')
-      const tempData = {}
-      // 需要取消的订单号
-      tempData.id = this.current_item.orderId
+      const tempData = Object.assign(
+        {},
+        {
+          id: this.current_item.orderId,
+          startTime: store.getters.reservationDateInfo.startTime,
+          endTime: store.getters.reservationDateInfo.endTime
+        }
+      )
       updateOrderCancel(tempData).then(res => {
         console.log(res.data.msg)
+        this.refreshBusInfo()
       })
-      this.refreshBusInfo()
       this.cancel_dialog = false
     },
     async refreshBusInfo() {
       try {
         this.items = await store.dispatch('bus_info/fetchBusInfo')
+        // 刷一下时间
+        await this.$store.dispatch('rank_info/handleDate')
+        // 刷一下用户订单信息
+        await this.$store.dispatch('user/fetchUserReservationInfo', {
+          uid: store.getters.userId,
+          startTime: store.getters.reservationDateInfo.startTime,
+          endTime: store.getters.reservationDateInfo.endTime
+        })
+        console.log('刷新执行完成')
+        this.resItems = this.computedResItems()
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
         this.alert.toggle = true
-        this.alert.message = '未能从服务器拉取数据'
+        this.alert.message = '服务器拉取数据异常'
       }
-      // 刷一下时间
-      this.$store.dispatch('rank_info/handleDate')
-      // 刷一下用户订单信息
-      this.$store.dispatch('user/fetchUserReservationInfo', {
-        uid: store.getters.userId,
-        startTime: store.getters.reservationDateInfo.startTime,
-        endTime: store.getters.reservationDateInfo.endTime
-      })
     }
   },
   created() {
     this.refreshBusInfo()
-    this.passenger.name = store.getters.userName
+    this.passenger.name = store.getters.userName || ''
     this.passenger.department = store.getters.department || ''
     this.passenger.phone = store.getters.phone || ''
   }

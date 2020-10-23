@@ -24,6 +24,7 @@ const mutations = {
   },
   SET_USER_SHUTTLE_INFOS: (state, shuttleInfos) => {
     state.shuttleInfos = shuttleInfos
+    console.log('更新了用户订单信息')
   }
 }
 
@@ -47,22 +48,19 @@ const actions = {
     return new Promise((resolve, reject) => {
       fetchUserReservationInfo(params)
         .then(response => {
+          let shuttleInfos = []
           const { data } = response.data
-          if (!(data && Array.isArray(data))) {
-            reject('用户订车数据异常')
-          }
-          if (data.length != 0) {
+          if (Array.isArray(data) && data.length != 0) {
             // 用戶有訂車數據
             commit('SET_USER_PHONE', data[0].phone)
             commit('SET_USER_DEPARTMENT', data[0].department)
+            data.forEach(el => {
+              let elObj = {}
+              elObj.shuttleId = el.shuttleId
+              elObj.orderId = el.id
+              shuttleInfos.push(elObj)
+            })
           }
-          let shuttleInfos = []
-          data.forEach(el => {
-            let elObj = {}
-            elObj.shuttleId = el.shuttleId
-            elObj.orderId = el.id
-            shuttleInfos.push(elObj)
-          })
           commit('SET_USER_SHUTTLE_INFOS', shuttleInfos)
           resolve(data)
         })

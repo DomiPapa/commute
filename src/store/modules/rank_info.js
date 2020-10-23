@@ -51,8 +51,8 @@ const actions = {
       reservation['startTime'] =
         moment()
           .add(-1, 'day')
-          .format('YYYY-MM-DD ') + ' 18:00'
-      reservation['endTime'] = moment().format('YYYY-MM-DD') + ' 20:00'
+          .format('YYYY-MM-DD') + ' 18:00'
+      reservation['endTime'] = moment().format('YYYY-MM-DD') + ' 18:00'
     }
     commit('SET_RESERVATION_DATE_INFO', reservation)
   }
