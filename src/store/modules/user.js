@@ -33,17 +33,19 @@ const mutations = {
 }
 
 const actions = {
-  fetchUserLoginInfo({ commit }, params) {
+  fetchUserLoginInfo({ commit }, authData) {
     return new Promise((resolve, reject) => {
-      fetchUserLoginInfo(params)
+      fetchUserLoginInfo(authData)
         .then(response => {
-          const { result } = response
-          const { userId, userName } = result
+          const { userId, userName } = response.data.result
+          console.log(response.data.result)
+          alert(response.data.result)
           commit('SET_USER_ID', userId)
           commit('SET_USER_NAME', userName)
-          resolve(result)
+          resolve(userId)
         })
         .catch(error => {
+          alert('使用authCode请求失败' + error)
           reject(error)
         })
     })

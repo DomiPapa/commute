@@ -2,9 +2,8 @@ import request from '@/utils/request'
 
 export function fetchUserLoginInfo(data) {
   return request({
-    url: '/login',
-    method: 'post',
-    params: data
+    url: '/login?authCode=' + data.authCode,
+    method: 'post'
   })
 }
 
