@@ -38,14 +38,13 @@ const actions = {
       fetchUserLoginInfo(authData)
         .then(response => {
           const { userId, userName } = response.data.result
-          console.log(response.data.result)
-          alert(response.data.result)
           commit('SET_USER_ID', userId)
           commit('SET_USER_NAME', userName)
-          resolve(userId)
+          resolve(`id值${userId}姓名${userName}`)
         })
         .catch(error => {
-          alert('使用authCode请求失败' + error)
+          console.log('fetchUserLoginInfo error -->')
+          console.log(error)
           reject(error)
         })
     })
@@ -56,6 +55,8 @@ const actions = {
         .then(response => {
           let shuttleInfos = []
           const { data } = response.data
+          console.log('获取用户订车信息->')
+          console.log(data)
           if (Array.isArray(data) && data.length != 0) {
             // 用戶有訂車數據
             commit('SET_USER_PHONE', data[0].phone)
@@ -71,6 +72,8 @@ const actions = {
           resolve(data)
         })
         .catch(error => {
+          console.log('fetchUserReservationInfo error -->')
+          console.log(error)
           reject(error)
         })
     })

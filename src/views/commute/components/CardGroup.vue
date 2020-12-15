@@ -194,6 +194,9 @@ export default {
     },
     handleRank(item) {
       console.log('rank')
+      this.passenger.name = store.getters.userName
+      this.passenger.department = store.getters.department
+      this.passenger.phone = store.getters.phone
       this.current_item = item
       this.order_dialog = true
     },
@@ -261,6 +264,7 @@ export default {
           endTime: store.getters.reservationDateInfo.endTime
         })
         console.log('刷新执行完成')
+        // 设置卡片信息
         this.resItems = this.computedResItems()
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
@@ -269,11 +273,10 @@ export default {
       }
     }
   },
+  watch: {},
   created() {
     this.refreshBusInfo()
-    this.passenger.name = store.getters.userName || ''
-    this.passenger.department = store.getters.department || ''
-    this.passenger.phone = store.getters.phone || ''
+    console.log('cardCoupCreated')
   }
 }
 </script>

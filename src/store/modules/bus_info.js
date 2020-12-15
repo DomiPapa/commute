@@ -27,7 +27,8 @@ const actions = {
           resolve(data)
         })
         .catch(error => {
-          console.log('action提交请求阶段错误')
+          console.log('fetchBusInfo error -->')
+          console.log(error)
           reject(error)
         })
     })

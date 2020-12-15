@@ -28,6 +28,8 @@ const actions = {
           resolve(data)
         })
         .catch(error => {
+          console.log('fetchRankInfo error -->')
+          console.log(error)
           reject(error)
         })
     })
