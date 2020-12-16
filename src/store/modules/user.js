@@ -40,7 +40,7 @@ const actions = {
           const { userId, userName } = response.data.result
           commit('SET_USER_ID', userId)
           commit('SET_USER_NAME', userName)
-          resolve(`id值${userId}姓名${userName}`)
+          resolve(userId)
         })
         .catch(error => {
           console.log('fetchUserLoginInfo error -->')
@@ -50,6 +50,8 @@ const actions = {
     })
   },
   fetchUserReservationInfo({ commit }, params) {
+    console.log(`fetchUserReservationInfo的参数-->`)
+    console.log(params)
     return new Promise((resolve, reject) => {
       fetchUserReservationInfo(params)
         .then(response => {

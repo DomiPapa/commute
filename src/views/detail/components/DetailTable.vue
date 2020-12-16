@@ -11,8 +11,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in rankInfos" :key="item.rank">
-          <td>{{ item.rank }}</td>
+        <tr v-for="(item, index) in rankInfos" :key="item.id">
+          <td>{{ item.rank || index + 1 }}</td>
           <td>{{ item.name }}</td>
           <td>{{ item.unit }}</td>
           <td>{{ item.phone }}</td>
