@@ -68,16 +68,16 @@
         <v-card-title class="">
           填写乘车人信息
         </v-card-title>
-        <v-container class="mx-1">
+        <v-container>
           <v-row>
-            <v-col cols="4">
+            <v-col cols="5">
               <v-text-field
                 prepend-icon="mdi-account"
                 placeholder="姓名"
                 v-model="passenger.name"
               ></v-text-field>
             </v-col>
-            <v-col cols="8">
+            <v-col cols="7">
               <v-text-field
                 prepend-icon="mdi-briefcase"
                 placeholder="单位"
@@ -86,7 +86,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="4">
+            <v-col cols="5">
               <v-text-field
                 type="tel"
                 prepend-icon="mdi-phone"
@@ -94,7 +94,7 @@
                 v-model="passenger.phone"
               ></v-text-field>
             </v-col>
-            <v-col cols="8">
+            <v-col cols="7">
               <v-select
                 prepend-icon="mdi-map-marker-radius"
                 :items="['达州基地旗杆处', '物资保障部']"
@@ -106,15 +106,73 @@
               ></v-select>
             </v-col>
           </v-row>
+          <v-row>
+            <v-col cols="6">
+              <span>添加随行人员</span>
+            </v-col>
+            <v-col cols="6">
+              <v-btn
+                class="ml-2"
+                fab
+                dark
+                small
+                color="primary"
+                @click="addEntourage"
+              >
+                <v-icon dark>mdi-plus</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-chip
+                v-for="(item, index) in entourage"
+                :key="index"
+                class="ma-2"
+                close
+                @click:close="handleEntourageDelete(item)"
+              >
+                {{ item }}
+              </v-chip>
+            </v-col>
+          </v-row>
         </v-container>
         <v-card-actions class="justify-end">
-          <v-btn text color="primary" @click="closeOrderSubmit">
+          <v-btn color="primary" @click="handleOrderSubmit">提交</v-btn>
+          <v-btn @click="closeOrderSubmit">
             取消
           </v-btn>
-          <v-btn text @click="handleOrderSubmit">提交</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--二级添加随行人员对话框-->
+    <v-dialog v-model="entourage_dialog" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span>添加随行人员</span>
+        </v-card-title>
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                prepend-icon="mdi-account"
+                placeholder="随行人员姓名"
+                v-model="ent"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-container>
+        <v-card-actions class="justify-end">
+          <v-btn color="primary" @click="handleAddEntourage">
+            确认
+          </v-btn>
+          <v-btn @click="entourage_dialog = false">
+            取消
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--取消对话框-->
     <v-dialog v-model="cancel_dialog" max-width="290">
       <v-card>
         <v-card-title class="headline">
@@ -181,6 +239,7 @@ export default {
       inset: false,
       order_dialog: false,
       cancel_dialog: false,
+      entourage_dialog: false,
       items: [],
       resItems: [],
       passenger: {
@@ -190,6 +249,9 @@ export default {
         //乘车点
         pickUpPoint: '达州基地旗杆处'
       },
+      // 随行人员
+      ent: '',
+      entourage: [],
       current_item: null,
       alert: {
         toggle: false,
@@ -288,6 +350,22 @@ export default {
         this.alert.toggle = true
         this.alert.message = '服务器拉取数据异常'
       }
+    },
+    // 打开随行人员添加页
+    addEntourage() {
+      this.entourage_dialog = true
+    },
+    // 添加随行人员
+    handleAddEntourage() {
+      if (this.ent) {
+        this.entourage.push(this.ent)
+      }
+      this.ent = ''
+      this.entourage_dialog = false
+    },
+    // 删除随行人员
+    handleEntourageDelete(item) {
+      this.entourage.splice(this.entourage.indexOf(item), 1)
     }
   },
   watch: {},
