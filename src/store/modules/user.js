@@ -37,9 +37,16 @@ const actions = {
     return new Promise((resolve, reject) => {
       fetchUserLoginInfo(authData)
         .then(response => {
-          const { userId, userName } = response.data.result
+          console.log('登录验证后返回数据-->')
+          console.log(response)
+          const { userId, userName, userInfo } = response.data.result
           commit('SET_USER_ID', userId)
           commit('SET_USER_NAME', userName)
+          commit('SET_USER_PHONE', userInfo.mobile)
+          if (Array.isArray(userInfo.departments)) {
+            commit('SET_USER_DEPARTMENT', userInfo.departments.join('-'))
+          }
+          commit('SET_USER_DEPARTMENT', userInfo.departments[0])
           resolve(userId)
         })
         .catch(error => {
@@ -61,8 +68,8 @@ const actions = {
           console.log(data)
           if (Array.isArray(data) && data.length != 0) {
             // 用戶有訂車數據
-            commit('SET_USER_PHONE', data[0].phone)
-            commit('SET_USER_DEPARTMENT', data[0].department)
+            // commit('SET_USER_PHONE', data[0].phone)
+            // commit('SET_USER_DEPARTMENT', data[0].department)
             data.forEach(el => {
               let elObj = {}
               elObj.shuttleId = el.shuttleId

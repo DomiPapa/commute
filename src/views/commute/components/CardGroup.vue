@@ -12,13 +12,15 @@
           >
             <v-item>
               <v-card color="#fff" class="pa-2">
-                <v-card-title class="headline d-flex ml-2">
-                  <span>{{ item.departureTime }}</span>
+                <v-card-title class="subtitle-1 d-flex ml-2">
+                  <span class="font-weight-bold">
+                    {{ item.departureTime | _2hour }}
+                  </span>
                   <span class="pl-4">{{ item.departure }}</span>
-                  <span class="pl-4">
+                  <span class="pl-2">
                     <v-icon>{{ mdiArrowRightBold }}</v-icon>
                   </span>
-                  <span class="pl-4">{{ item.arrival }}</span>
+                  <span class="pl-2">{{ item.arrival }}</span>
                 </v-card-title>
                 <v-divider :inset="inset"></v-divider>
                 <v-card-text class="ml-2 d-flex justify-space-between">
@@ -66,32 +68,43 @@
         <v-card-title class="">
           填写乘车人信息
         </v-card-title>
-        <v-container>
-          <v-row class="mx-2">
-            <v-form ref="form">
-              <v-col cols="12">
-                <v-text-field
-                  prepend-icon="mdi-account"
-                  placeholder="姓名"
-                  v-model="passenger.name"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  prepend-icon="mdi-briefcase"
-                  placeholder="单位"
-                  v-model="passenger.department"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
-                  type="tel"
-                  prepend-icon="mdi-phone"
-                  placeholder="电话号码"
-                  v-model="passenger.phone"
-                ></v-text-field>
-              </v-col>
-            </v-form>
+        <v-container class="mx-1">
+          <v-row>
+            <v-col cols="4">
+              <v-text-field
+                prepend-icon="mdi-account"
+                placeholder="姓名"
+                v-model="passenger.name"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="8">
+              <v-text-field
+                prepend-icon="mdi-briefcase"
+                placeholder="单位"
+                v-model="passenger.department"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="4">
+              <v-text-field
+                type="tel"
+                prepend-icon="mdi-phone"
+                placeholder="电话号码"
+                v-model="passenger.phone"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="8">
+              <v-select
+                prepend-icon="mdi-map-marker-radius"
+                :items="['达州基地旗杆处', '物资保障部']"
+                label="乘车地点"
+                v-model="passenger.pickUpPoint"
+                menu-props="auto"
+                hide-details
+                single-line
+              ></v-select>
+            </v-col>
           </v-row>
         </v-container>
         <v-card-actions class="justify-end">
@@ -147,7 +160,7 @@
   </div>
 </template>
 <script>
-// import * as dd from 'dingtalk-jsapi'
+import moment from 'moment'
 import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
@@ -156,6 +169,11 @@ export default {
   name: 'CardGroup',
   components: {
     ErrorAlert
+  },
+  filters: {
+    _2hour: function(time_pram) {
+      return moment(time_pram, 'YYYY-MM-DD HH:mm:ss').format('HH:mm')
+    }
   },
   data: () => {
     return {
@@ -168,7 +186,9 @@ export default {
       passenger: {
         name: '',
         department: '',
-        phone: ''
+        phone: '',
+        //乘车点
+        pickUpPoint: '达州基地旗杆处'
       },
       current_item: null,
       alert: {
@@ -228,12 +248,9 @@ export default {
         */
         this.refreshBusInfo()
       })
-
-      // this.$refs.form.reset()
       this.order_dialog = false
     },
     closeOrderSubmit() {
-      // this.$refs.form.reset()
       this.order_dialog = false
     },
     handleCancelSubmit() {

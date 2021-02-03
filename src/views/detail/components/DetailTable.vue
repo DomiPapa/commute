@@ -14,7 +14,7 @@
         <tr v-for="(item, index) in rankInfos" :key="item.id">
           <td>{{ item.rank || index + 1 }}</td>
           <td>{{ item.name }}</td>
-          <td>{{ item.unit }}</td>
+          <td>{{ item.department }}</td>
           <td>{{ item.phone }}</td>
         </tr>
       </tbody>
@@ -47,6 +47,8 @@ export default {
           startTime: store.getters.reservationDateInfo.startTime,
           endTime: store.getters.reservationDateInfo.endTime
         })
+        console.log('获取排名数据-->')
+        console.log(data)
         this.rankInfos = data
       } catch (error) {
         this.alert.toggle = true
