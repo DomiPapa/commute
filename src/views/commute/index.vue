@@ -1,21 +1,34 @@
 <template>
   <v-card class="light-blue lighten-5" elevation="0">
     <v-card-title class="text-center justify-center py-6">
-      <v-btn icon color="white" v-show="(today = false)" @click="change2today">
-        <v-icon>mdi-less-than</v-icon>
-      </v-btn>
-      <h1 class="font-weight-bold display-1">
-        {{ this.$store.getters.reservationDateInfo.day }} -
-        {{ this.$store.getters.reservationDateInfo.date }}
-      </h1>
-      <v-btn
-        icon
-        color="white"
-        v-show="(today = true)"
-        @click="change2tomorrow"
-      >
-        <v-icon>mdi-greater-than</v-icon>
-      </v-btn>
+      <v-row>
+        <v-col cols="2">
+          <v-btn
+            icon
+            color="cyan"
+            v-show="today === false"
+            @click="change2today"
+          >
+            <v-icon>mdi-chevron-left-circle</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col cols="8">
+          <h2 class="font-weight-bold">
+            {{ this.$store.getters.reservationDateInfo.day }} -
+            {{ this.$store.getters.reservationDateInfo.date }}
+          </h2>
+        </v-col>
+        <v-col cols="2">
+          <v-btn
+            icon
+            color="cyan"
+            v-show="today === true"
+            @click="change2tomorrow"
+          >
+            <v-icon>mdi-chevron-right-circle</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card-title>
     <v-card-text>
       <div class="mx-2">

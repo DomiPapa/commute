@@ -12,7 +12,10 @@ export default {
   name: 'App',
   data() {
     return {
-      userId: ''
+      // 生产用
+      // userId: '',
+      // 调试用（张博的ID）
+      userId: '2069621466776250'
     }
   },
   computed: {
@@ -104,7 +107,7 @@ export default {
   created() {
     console.log('Appcreated')
     // 处理钉钉获取逻辑
-    this.handleDD()
+    // this.handleDD()
     // 本地调试环境
     // this.handleLocal()
   }

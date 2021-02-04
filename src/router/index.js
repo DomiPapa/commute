@@ -4,8 +4,8 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 /* Layout */
-// import Layout from '@/layout'
-import Layout from '@/layout-low'
+import Layout from '@/layout'
+//import Layout from '@/layout-low'
 export const constantRoutes = [
   {
     path: '/login',
@@ -29,6 +29,7 @@ export const constantRoutes = [
       }
     ]
   },
+  // 查看车辆预约情况
   {
     path: '/detail',
     component: Layout,
@@ -38,6 +39,45 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/detail/index'),
         name: 'Detail'
+      }
+    ]
+  },
+  // 查看个人订车信息
+  {
+    path: '/order',
+    component: Layout,
+    redirect: '/order/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/order/index'),
+        name: 'Order'
+      }
+    ]
+  },
+  // 查看操作说明
+  {
+    path: '/instruction',
+    component: Layout,
+    redirect: '/instruction/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/instruction/index'),
+        name: 'Instruction'
+      }
+    ]
+  },
+  // 反馈意见
+  {
+    path: '/suggestion',
+    component: Layout,
+    redirect: '/suggestion/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/suggestion/index'),
+        name: 'Suggestion'
       }
     ]
   }
