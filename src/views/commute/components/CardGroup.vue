@@ -36,6 +36,7 @@
                     <span>{{ item.remaining }}</span>
                   </div>
                   <div class="ma-1">
+                    <!--
                     <v-btn
                       v-if="item.orderId"
                       depressed
@@ -43,6 +44,10 @@
                       @click="cancelRank(item)"
                     >
                       取消预约
+                    </v-btn>
+                    -->
+                    <v-btn v-if="item.status === 0" depressed color="error">
+                      已过期
                     </v-btn>
                     <v-btn v-else-if="item.remaining === 0" disabled>
                       已约满
@@ -233,6 +238,9 @@ export default {
       return moment(time_pram, 'YYYY-MM-DD HH:mm:ss').format('HH:mm')
     }
   },
+  props: {
+    today: Boolean
+  },
   data: () => {
     return {
       mdiArrowRightBold,
@@ -261,6 +269,7 @@ export default {
   },
   methods: {
     computedResItems() {
+      /*
       let shuttleInfos = store.getters.shuttleInfos
       let resArr = []
       this.items.forEach(el => {
@@ -271,6 +280,22 @@ export default {
           }
         })
         resArr.push(eObj)
+      })
+      return resArr
+      */
+      let resArr = []
+      this.items.forEach(el => {
+        if (this.today) {
+          if (el.status != 2) {
+            let eObj = Object.assign({}, el)
+            resArr.push(eObj)
+          }
+        } else {
+          if (el.status === 2) {
+            let eObj = Object.assign({}, el)
+            resArr.push(eObj)
+          }
+        }
       })
       return resArr
     },
@@ -289,7 +314,9 @@ export default {
     },
     checkDetail(item) {
       this.$store.dispatch('bus_info/setCurrentItemId', item.id)
-      this.$router.push('/detail')
+      this.$router.push('/detail').catch(err => {
+        err
+      })
     },
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
@@ -334,6 +361,7 @@ export default {
     async refreshBusInfo() {
       try {
         this.items = await store.dispatch('bus_info/fetchBusInfo')
+        /*
         // 刷一下时间
         this.$store.dispatch('rank_info/handleDate')
         // 刷一下用户订单信息
@@ -343,6 +371,7 @@ export default {
           endTime: store.getters.reservationDateInfo.endTime
         })
         console.log('刷新执行完成')
+        */
         // 设置卡片信息
         this.resItems = this.computedResItems()
       } catch (error) {
@@ -368,7 +397,11 @@ export default {
       this.entourage.splice(this.entourage.indexOf(item), 1)
     }
   },
-  watch: {},
+  watch: {
+    today() {
+      this.refreshBusInfo()
+    }
+  },
   created() {
     this.refreshBusInfo()
     console.log('cardCoupCreated')

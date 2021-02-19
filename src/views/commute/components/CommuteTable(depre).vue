@@ -111,7 +111,9 @@ export default {
     editItem(item) {
       this.editedIndex = this.desserts.indexOf(item)
       this.editedItem = Object.assign({}, item)
-      this.$router.push('/detail')
+      this.$router.push('/detail').catch(err => {
+        err
+      })
     },
 
     close() {

@@ -13,9 +13,14 @@
           </v-btn>
         </v-col>
         <v-col cols="8">
+          <!--
           <h2 class="font-weight-bold">
             {{ this.$store.getters.reservationDateInfo.day }} -
             {{ this.$store.getters.reservationDateInfo.date }}
+          </h2>
+          -->
+          <h2 class="font-weight-bold">
+            {{ this.day_tag }}-{{ this.date_tag }}
           </h2>
         </v-col>
         <v-col cols="2">
@@ -52,12 +57,13 @@
       </div>
     </v-card-text>
     <v-card-text>
-      <card-group />
+      <card-group :today="today" />
     </v-card-text>
   </v-card>
 </template>
 <script>
 // import store from '@/store'
+import moment from 'moment'
 import CardGroup from './components/CardGroup'
 export default {
   name: 'Commute',
@@ -65,6 +71,8 @@ export default {
   data: () => {
     return {
       today: true,
+      day_tag: '今日',
+      date_tag: moment().format('MM月DD日'),
       alert: true,
       reservation: {}
     }
@@ -72,9 +80,15 @@ export default {
   methods: {
     change2today() {
       this.today = true
+      this.day_tag = '今日'
+      this.date_tag = moment().format('MM月DD日')
     },
     change2tomorrow() {
       this.today = false
+      this.day_tag = '明日'
+      this.date_tag = moment()
+        .add(1, 'd')
+        .format('MM月DD日')
     }
   },
   created() {

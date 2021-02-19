@@ -70,16 +70,24 @@ export default {
     handleNavDrawer(text) {
       switch (text) {
         case '订车信息':
-          this.$router.push('/order')
+          this.$router.push('/order').catch(err => {
+            err
+          })
           break
         case '操作说明':
-          this.$router.push('/instruction')
+          this.$router.push('/instruction').catch(err => {
+            err
+          })
           break
         case '反馈意见':
-          this.$router.push('/suggestion')
+          this.$router.push('/suggestion').catch(err => {
+            err
+          })
           break
         default:
-          this.$router.push('/')
+          this.$router.push('/').catch(err => {
+            err
+          })
           break
       }
     }
