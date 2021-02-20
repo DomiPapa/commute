@@ -6,8 +6,14 @@ const state = {
   userId: '2014672533791258',
   userName: '徐聪',
   */
+
+  userId: '2069621466776250',
+  userName: '张博',
+
+  /*
   userId: '',
   userName: '',
+  */
   phone: '',
   department: '',
   shuttleInfos: []
@@ -67,9 +73,6 @@ const actions = {
           console.log('获取用户订车信息->')
           console.log(data)
           if (Array.isArray(data) && data.length != 0) {
-            // 用戶有訂車數據
-            // commit('SET_USER_PHONE', data[0].phone)
-            // commit('SET_USER_DEPARTMENT', data[0].department)
             data.forEach(el => {
               let elObj = {}
               elObj.shuttleId = el.shuttleId

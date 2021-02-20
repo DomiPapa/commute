@@ -44,14 +44,14 @@ export const constantRoutes = [
   },
   // 查看个人订车信息
   {
-    path: '/order',
+    path: '/reservation',
     component: Layout,
-    redirect: '/order/index',
+    redirect: '/reservation/index',
     children: [
       {
         path: 'index',
-        component: () => import('@/views/order/index'),
-        name: 'Order'
+        component: () => import('@/views/reservation/index'),
+        name: 'Reservation'
       }
     ]
   },

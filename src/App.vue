@@ -46,24 +46,21 @@ export default {
                   .then(res => {
                     _this.userId = res
                     console.log('fetchUserLoginInfo执行结果' + res)
+                    /*
                     // 刷一下时间
                     store.dispatch('rank_info/handleDate')
-                    // 获取一下用户订单信息
+                    // 获取用户订单信息
                     console.log(
                       `已刷取时间${store.getters.reservationDateInfo.startTime}`
                     )
-                    // 异步执行顺序逻辑存在问题 待解决
-                    /*
-              store
-                .dispatch('user/fetchUserReservationInfo', {
-                  uid: res,
-                  startTime: store.getters.reservationDateInfo.startTime,
-                  endTime: store.getters.reservationDateInfo.endTime
-                })
-                .catch(err => {
-                  console.log(err)
-                })
-                */
+                    */
+                    store
+                      .dispatch('user/fetchUserReservationInfo', {
+                        uid: res
+                      })
+                      .catch(err => {
+                        console.log(err)
+                      })
                   })
                   .catch(err => {
                     console.log(err)

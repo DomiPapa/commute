@@ -70,7 +70,7 @@ export default {
     handleNavDrawer(text) {
       switch (text) {
         case '订车信息':
-          this.$router.push('/order').catch(err => {
+          this.$router.push('/reservation').catch(err => {
             err
           })
           break
