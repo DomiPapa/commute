@@ -70,7 +70,7 @@
           <v-divider :inset="inset"></v-divider>
           <v-card-text class="ml-2 d-flex justify-space-between">
             <div class="d-flex text-center">
-              <span class="font-weight-bold">当前时间 今日已无可预约车次</span>
+              <span class="font-weight-bold">当前时间 已无可预约车次</span>
             </div>
           </v-card-text>
         </v-card>
@@ -121,16 +121,16 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="8" class="d-flex ">
+            <v-col cols="8" class="d-flex align-center">
               <v-icon color="primary" class="pr-2">mdi-account-multiple</v-icon>
               <span>添加随行家属</span>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="4" class="d-flex  flex-row-reverse align-center">
               <v-btn
                 class="ml-2"
                 fab
                 dark
-                small
+                x-small
                 color="primary"
                 @click="addEntourage"
               >
@@ -234,6 +234,7 @@ export default {
     }
   },
   methods: {
+    // 计算当日应显示的班车信息
     computedResItems() {
       /*
       let shuttleInfos = store.getters.shuttleInfos
@@ -265,15 +266,19 @@ export default {
       })
       return resArr
     },
+    // 处理点击预约的逻辑，若当前id存在该班次约车信息则不允许继续约
     handleRank(item) {
-      console.log('rank')
+      console.log('点击了预约,处理项目item-->')
+      console.log(item)
+      store.dispatch('user/fetchUserReservationInfo', {
+        uid: store.getters.userId
+      })
       this.passenger.name = store.getters.userName
       this.passenger.department = store.getters.department
       this.passenger.phone = store.getters.phone
       this.current_item = item
       this.order_dialog = true
     },
-
     checkDetail(item) {
       this.$store.dispatch('bus_info/setCurrentItemId', item.id)
       this.$router.push('/detail').catch(err => {
