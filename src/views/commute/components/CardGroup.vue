@@ -36,16 +36,6 @@
                     <span>{{ item.remaining }}</span>
                   </div>
                   <div class="ma-1">
-                    <!--
-                    <v-btn
-                      v-if="item.orderId"
-                      depressed
-                      color="error"
-                      @click="cancelRank(item)"
-                    >
-                      取消预约
-                    </v-btn>
-                    -->
                     <v-btn v-if="item.status === 0" depressed color="error">
                       已过期
                     </v-btn>
@@ -66,8 +56,27 @@
             </v-item>
           </v-col>
         </v-row>
+        <v-card
+          color="#fff"
+          class="pa-2"
+          v-if="this.computedResItems().length === 0"
+        >
+          <v-card-title class="subtitle-1 d-flex ml-2">
+            <v-icon color="red" class="pr-1">mdi-bus-clock</v-icon>
+            <span class="font-weight-bold">
+              很抱歉
+            </span>
+          </v-card-title>
+          <v-divider :inset="inset"></v-divider>
+          <v-card-text class="ml-2 d-flex justify-space-between">
+            <div class="d-flex text-center">
+              <span class="font-weight-bold">当前时间 今日已无可预约车次</span>
+            </div>
+          </v-card-text>
+        </v-card>
       </v-container>
     </v-item-group>
+    <!--一级预约对话框-->
     <v-dialog v-model="order_dialog" width="800px">
       <v-card>
         <v-card-title class="">
@@ -112,10 +121,11 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="6">
-              <span>添加随行人员</span>
+            <v-col cols="8" class="d-flex ">
+              <v-icon color="primary" class="pr-2">mdi-account-multiple</v-icon>
+              <span>添加随行家属</span>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="4">
               <v-btn
                 class="ml-2"
                 fab
@@ -150,18 +160,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!--二级添加随行人员对话框-->
+    <!--二级添加随行家属对话框-->
     <v-dialog v-model="entourage_dialog" max-width="500px">
       <v-card>
         <v-card-title>
-          <span>添加随行人员</span>
+          <span>添加随行家属</span>
         </v-card-title>
         <v-container>
           <v-row>
             <v-col cols="12">
               <v-text-field
                 prepend-icon="mdi-account"
-                placeholder="随行人员姓名"
+                placeholder="随行家属姓名"
                 v-model="ent"
               ></v-text-field>
             </v-col>
@@ -177,49 +187,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!--取消对话框-->
-    <v-dialog v-model="cancel_dialog" max-width="290">
-      <v-card>
-        <v-card-title class="headline">
-          您确定要取消预约吗？
-        </v-card-title>
-
-        <v-card-text v-if="current_item">
-          <v-list dense>
-            <v-list-item>
-              <v-list-item-content>时间:</v-list-item-content>
-              <v-list-item-content class="align-end">
-                {{ current_item.departureTime }}
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-content>往返地:</v-list-item-content>
-              <v-list-item-content class="align-end">
-                {{ current_item.departure }} — {{ current_item.arrival }}
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-list-item>
-              <v-list-item-content>剩余座位:</v-list-item-content>
-              <v-list-item-content class="align-end">
-                {{ current_item.remaining }}
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="normal" @click="cancel_dialog = false">
-            返回
-          </v-btn>
-          <v-btn color="error" @click="handleCancelSubmit">
-            确定取消
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 <script>
@@ -227,7 +194,7 @@ import moment from 'moment'
 import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
-import { updateOrderSubmit, updateOrderCancel } from '@/api/rank-info.js'
+import { updateOrderSubmit } from '@/api/rank-info.js'
 export default {
   name: 'CardGroup',
   components: {
@@ -246,7 +213,6 @@ export default {
       mdiArrowRightBold,
       inset: false,
       order_dialog: false,
-      cancel_dialog: false,
       entourage_dialog: false,
       items: [],
       resItems: [],
@@ -257,7 +223,7 @@ export default {
         //乘车点
         pickUpPoint: '达州基地旗杆处'
       },
-      // 随行人员
+      // 随行家属
       ent: '',
       entourage: [],
       current_item: null,
@@ -307,11 +273,7 @@ export default {
       this.current_item = item
       this.order_dialog = true
     },
-    cancelRank(item) {
-      console.log('cancelRank')
-      this.current_item = item
-      this.cancel_dialog = true
-    },
+
     checkDetail(item) {
       this.$store.dispatch('bus_info/setCurrentItemId', item.id)
       this.$router.push('/detail').catch(err => {
@@ -342,22 +304,6 @@ export default {
     closeOrderSubmit() {
       this.order_dialog = false
     },
-    handleCancelSubmit() {
-      console.log('handleCancelSubmit')
-      const tempData = Object.assign(
-        {},
-        {
-          id: this.current_item.orderId,
-          startTime: store.getters.reservationDateInfo.startTime,
-          endTime: store.getters.reservationDateInfo.endTime
-        }
-      )
-      updateOrderCancel(tempData).then(res => {
-        console.log(res.data.msg)
-        this.refreshBusInfo()
-      })
-      this.cancel_dialog = false
-    },
     async refreshBusInfo() {
       try {
         this.items = await store.dispatch('bus_info/fetchBusInfo')
@@ -380,11 +326,11 @@ export default {
         this.alert.message = '服务器拉取数据异常'
       }
     },
-    // 打开随行人员添加页
+    // 打开随行家属添加页
     addEntourage() {
       this.entourage_dialog = true
     },
-    // 添加随行人员
+    // 添加随行家属
     handleAddEntourage() {
       if (this.ent) {
         this.entourage.push(this.ent)
@@ -392,7 +338,7 @@ export default {
       this.ent = ''
       this.entourage_dialog = false
     },
-    // 删除随行人员
+    // 删除随行家属
     handleEntourageDelete(item) {
       this.entourage.splice(this.entourage.indexOf(item), 1)
     }
