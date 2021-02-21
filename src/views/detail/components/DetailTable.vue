@@ -1,21 +1,23 @@
 <template>
-  <v-simple-table fixed-header>
+  <v-simple-table fixed-header class="mytb">
     <error-alert :alert="alert" />
     <template v-slot:default>
       <thead>
         <tr>
           <th class="text-left">名次</th>
           <th class="text-left">姓名</th>
-          <th class="text-left">单位</th>
+          <th class="text-left">乘车点</th>
           <th class="text-left">电话</th>
+          <th class="text-left">单位</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item, index) in rankInfos" :key="item.id">
           <td>{{ item.rank || index + 1 }}</td>
           <td>{{ item.name }}</td>
-          <td>{{ item.department }}</td>
+          <td class="pup">{{ item.pickUpPoint }}</td>
           <td>{{ item.phone }}</td>
+          <td>{{ item.department }}</td>
         </tr>
       </tbody>
     </template>
@@ -43,9 +45,7 @@ export default {
     void (async () => {
       try {
         const { data } = await store.dispatch('rank_info/fetchRankInfo', {
-          sid: store.getters.currentItemId,
-          startTime: store.getters.reservationDateInfo.startTime,
-          endTime: store.getters.reservationDateInfo.endTime
+          sid: store.getters.currentItemId
         })
         console.log('获取排名数据-->')
         console.log(data)
@@ -58,3 +58,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+.mytb {
+  word-break: keep-all;
+}
+.pup {
+  color: red;
+  font-weight: 600;
+}
+</style>

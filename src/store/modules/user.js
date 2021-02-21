@@ -75,13 +75,21 @@ const actions = {
           if (Array.isArray(data) && data.length != 0) {
             data.forEach(el => {
               let elObj = {}
-              elObj.shuttleId = el.shuttleId
-              elObj.orderId = el.id
+              elObj.shuttleId = el.shuttle.sid
+              elObj.orderId = el.rid
+              elObj.department = el.department
+              elObj.name = el.name
+              elObj.pickUpPoint = el.pickUpPoint
+              elObj.reserveTime = el.reserveTime
+              elObj.arrival = el.shuttle.arrival
+              elObj.departure = el.shuttle.departure
+              elObj.departureTime = el.shuttle.departureTime
+              elObj.remaining = el.shuttle.remaining
               shuttleInfos.push(elObj)
             })
           }
           commit('SET_USER_SHUTTLE_INFOS', shuttleInfos)
-          resolve(data)
+          resolve(shuttleInfos)
         })
         .catch(error => {
           console.log('fetchUserReservationInfo error -->')

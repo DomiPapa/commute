@@ -56,6 +56,7 @@
             </v-item>
           </v-col>
         </v-row>
+        <!-- 无可用车次时的提示卡 -->
         <v-card
           color="#fff"
           class="pa-2"
@@ -187,6 +188,23 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--已有该班次约车信息时的提示对话框-->
+    <v-dialog v-model="reserverd_dialog" width="500">
+      <v-card>
+        <v-card-title class="headline cyan">
+          提示
+        </v-card-title>
+        <v-card-text class="text-subtitle-1 py-5">
+          您已在当前车次下有预约信息，若您要进行修改，例如追加随行人员，请在订车信息页中取消该车次所有约车人后，再重新预约。
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="reserverd_dialog = false">
+            确定
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
@@ -214,6 +232,7 @@ export default {
       inset: false,
       order_dialog: false,
       entourage_dialog: false,
+      reserverd_dialog: false,
       items: [],
       resItems: [],
       passenger: {
@@ -270,9 +289,14 @@ export default {
     handleRank(item) {
       console.log('点击了预约,处理项目item-->')
       console.log(item)
+      /*
+      // 如果已经有该班次的约车信息，则提示不要重复预约
       store.dispatch('user/fetchUserReservationInfo', {
         uid: store.getters.userId
       })
+      */
+      // this.reserverd_dialog = true
+
       this.passenger.name = store.getters.userName
       this.passenger.department = store.getters.department
       this.passenger.phone = store.getters.phone
@@ -280,18 +304,36 @@ export default {
       this.order_dialog = true
     },
     checkDetail(item) {
-      this.$store.dispatch('bus_info/setCurrentItemId', item.id)
+      this.$store.dispatch('bus_info/setCurrentItemId', item.sid)
       this.$router.push('/detail').catch(err => {
         err
       })
     },
     handleOrderSubmit() {
       console.log('handleOrderSubmit')
-      const tempData = Object.assign(
-        { shuttleId: this.current_item.id, userId: store.getters.userId },
+      let reservations_arr = []
+      let mainData = Object.assign(
+        { shuttleId: this.current_item.sid, userId: store.getters.userId },
         this.passenger
       )
-      updateOrderSubmit(tempData).then(res => {
+      // 先将主订车人对象压入数组
+      reservations_arr.push(mainData)
+      // 再构造随行人员对象并压入数组
+      if (this.entourage.length !== 0) {
+        this.entourage.forEach(ent => {
+          let entData = Object.assign(
+            { shuttleId: this.current_item.sid, userId: store.getters.userId },
+            {
+              name: ent,
+              phone: this.passenger.phone,
+              pickUpPoint: this.passenger.pickUpPoint
+            }
+          )
+          reservations_arr.push(entData)
+        })
+      }
+
+      updateOrderSubmit(reservations_arr).then(res => {
         console.log(res.data.msg)
         /*
         if (res.data.code === 10000) {
@@ -302,6 +344,7 @@ export default {
           })
         }
         */
+        // 预约成功后从新刷新一下视图
         this.refreshBusInfo()
       })
       this.order_dialog = false
