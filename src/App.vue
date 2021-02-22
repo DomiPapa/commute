@@ -13,9 +13,9 @@ export default {
   data() {
     return {
       // 生产用
-      // userId: '',
+      userId: ''
       // 调试用（张博的ID）
-      userId: '2069621466776250'
+      // userId: '2069621466776250'
     }
   },
   computed: {
@@ -26,7 +26,6 @@ export default {
   methods: {
     handleDD() {
       let _this = this
-      console.log('执行handleDD')
       // 钉钉处理逻辑
       try {
         dd.ready(function() {
@@ -46,14 +45,7 @@ export default {
                   .then(res => {
                     _this.userId = res
                     console.log('fetchUserLoginInfo执行结果' + res)
-                    /*
-                    // 刷一下时间
-                    store.dispatch('rank_info/handleDate')
-                    // 获取用户订单信息
-                    console.log(
-                      `已刷取时间${store.getters.reservationDateInfo.startTime}`
-                    )
-                    */
+                    /* 
                     store
                       .dispatch('user/fetchUserReservationInfo', {
                         uid: res
@@ -61,6 +53,7 @@ export default {
                       .catch(err => {
                         console.log(err)
                       })
+                      */
                   })
                   .catch(err => {
                     console.log(err)
@@ -78,35 +71,12 @@ export default {
         console.log(error)
         console.log('钉钉环境未到位')
       }
-    },
-    handleLocal() {
-      alert('执行了本地环境！联系管理员')
-      store
-        .dispatch('user/fetchUserLoginInfo', {
-          authCode: 'e7d9b4468e8039ce9d3f808dd23da810'
-        })
-        .then(res => {
-          alert('res.userId成功' + res)
-          // 刷一下时间
-          store.dispatch('rank_info/handleDate')
-          // 获取一下用户订单信息
-          store.dispatch('user/fetchUserReservationInfo', {
-            uid: store.getters.userId,
-            startTime: store.getters.reservationDateInfo.startTime,
-            endTime: store.getters.reservationDateInfo.endTime
-          })
-        })
-        .catch(err => {
-          console.log(err)
-        })
     }
   },
   created() {
     console.log('Appcreated')
     // 处理钉钉获取逻辑
-    // this.handleDD()
-    // 本地调试环境
-    // this.handleLocal()
+    this.handleDD()
   }
 }
 </script>

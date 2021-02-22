@@ -287,21 +287,39 @@ export default {
     },
     // 处理点击预约的逻辑，若当前id存在该班次约车信息则不允许继续约
     handleRank(item) {
+      let _this = this
       console.log('点击了预约,处理项目item-->')
       console.log(item)
-      /*
-      // 如果已经有该班次的约车信息，则提示不要重复预约
-      store.dispatch('user/fetchUserReservationInfo', {
-        uid: store.getters.userId
-      })
-      */
-      // this.reserverd_dialog = true
 
-      this.passenger.name = store.getters.userName
-      this.passenger.department = store.getters.department
-      this.passenger.phone = store.getters.phone
-      this.current_item = item
-      this.order_dialog = true
+      // 如果已经有该班次的约车信息，则提示不要重复预约
+      store
+        .dispatch('user/fetchUserReservationInfo', {
+          uid: store.getters.userId
+        })
+        .then(res => {
+          console.log(res)
+          if (Array.isArray(res)) {
+            res.forEach(el => {
+              if (el.shuttleId === item.sid) {
+                // 打开提示已预约提示框 结束函数流程
+                _this.reserverd_dialog = true
+                throw '该车次已存在预约'
+              }
+            })
+            // 打开订车页 允许下订单
+            this.passenger.name = store.getters.userName
+            this.passenger.department = store.getters.department
+            this.passenger.phone = store.getters.phone
+            this.current_item = item
+            this.order_dialog = true
+          } else {
+            console.log('服务器获取数据不为数组')
+          }
+        })
+        .catch(err => {
+          this.alert.toggle = true
+          this.alert.message = err
+        })
     },
     checkDetail(item) {
       this.$store.dispatch('bus_info/setCurrentItemId', item.sid)

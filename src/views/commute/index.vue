@@ -13,12 +13,6 @@
           </v-btn>
         </v-col>
         <v-col cols="8">
-          <!--
-          <h2 class="font-weight-bold">
-            {{ this.$store.getters.reservationDateInfo.day }} -
-            {{ this.$store.getters.reservationDateInfo.date }}
-          </h2>
-          -->
           <h2 class="font-weight-bold">
             {{ this.day_tag }}-{{ this.date_tag }}
           </h2>
