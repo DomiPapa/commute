@@ -112,7 +112,7 @@
             <v-col cols="7">
               <v-select
                 prepend-icon="mdi-map-marker-radius"
-                :items="['达州基地旗杆处', '物资保障部']"
+                :items="['达州基地旗杆处', '物资保障部', '生产管理中心']"
                 label="乘车地点"
                 v-model="passenger.pickUpPoint"
                 menu-props="auto"
