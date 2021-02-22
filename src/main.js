@@ -7,6 +7,11 @@ import '@/styles/index.scss' // global css
 import App from './App.vue'
 import store from './store'
 import router from './router'
+// 引入video player
+import VueVideoPlayer from 'vue-video-player'
+// require videojs style
+import 'video.js/dist/video-js.css'
+Vue.use(VueVideoPlayer)
 
 Vue.config.productionTip = false
 

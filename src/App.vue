@@ -15,7 +15,7 @@ export default {
       // 生产用
       userId: ''
       // 调试用（张博的ID）
-      // userId: '2069621466776250'
+      //userId: '2069621466776250'
     }
   },
   computed: {
