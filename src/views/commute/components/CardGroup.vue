@@ -247,7 +247,7 @@ export default {
         department: '',
         phone: '',
         //乘车点
-        pickUpPoint: ''
+        pickUpPoint: '默认'
       },
       // 随行家属
       ent: '',
