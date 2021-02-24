@@ -25,6 +25,14 @@
                     </span>
                     <span class="pl-2">{{ item.arrival }}</span>
                   </div>
+                  <div @click="showQrcode(item)">
+                    <v-avatar tile color="blue">
+                      <!--
+                      <v-icon dark>mdi-alarm</v-icon>
+                      -->
+                      <img :src="baseurl + 'qrcode.png'" alt="乘车码" />
+                    </v-avatar>
+                  </div>
                 </v-card-title>
                 <v-divider :inset="inset"></v-divider>
                 <v-card-text>
@@ -39,7 +47,10 @@
                         <v-col cols="8">{{ item.pickUpPoint }}</v-col>
                       </v-row>
                     </v-col>
-                    <v-col cols="4" class="d-flex align-end">
+                    <v-col
+                      cols="4"
+                      class="d-flex flex-column-reverse align-end"
+                    >
                       <v-btn depressed color="error" @click="cancelRank(item)">
                         退订
                       </v-btn>
@@ -136,10 +147,25 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--二维码对话框-->
+    <v-dialog v-model="qrcode_dialog">
+      <v-card @click="qrcode_dialog = false">
+        <v-card-title class="headline text-center">
+          发车时间前后30分钟内可用
+        </v-card-title>
+
+        <v-card-text class="teal accent-3 pt-4">
+          <div class="">
+            <Qrcode sid="url" :text="codeText" :swidth="swidth"></Qrcode>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
 import moment from 'moment'
+import Qrcode from './components/Qrcode'
 import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
@@ -147,7 +173,8 @@ import { updateOrderCancel } from '@/api/rank-info.js'
 export default {
   name: 'Reservation',
   components: {
-    ErrorAlert
+    ErrorAlert,
+    Qrcode
   },
   filters: {
     _2dayhour: function(time_pram) {
@@ -164,7 +191,17 @@ export default {
       alert: {
         toggle: false,
         message: ''
-      }
+      },
+      baseurl: process.env.BASE_URL,
+      // qrcode
+      qrcode_dialog: false,
+      url: '',
+      codeText: ''
+    }
+  },
+  computed: {
+    swidth() {
+      return (window.innerWidth * 0.9 * 0.4 * 320) / window.innerWidth / 20 //370*320/(window.innerWidth)/20
     }
   },
   methods: {
@@ -200,6 +237,21 @@ export default {
         this.alert.toggle = true
         this.alert.message = '服务器拉取用户订车数据异常'
       }
+    },
+    // 显示二维码
+    showQrcode(item) {
+      console.log(item)
+
+      // 发车时间差
+      let res_time = moment(item.departureTime, 'YYYY-MM-DD HH:mm:ss').diff(
+        moment(),
+        'minute'
+      )
+      if (Math.abs(res_time) <= 30) {
+        console.log('时间前后不足30')
+        this.qrcode_dialog = true
+      }
+      // this.qrcode_dialog = true
     }
   },
   created() {

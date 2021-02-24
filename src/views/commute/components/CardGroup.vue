@@ -36,7 +36,7 @@
                     <span>{{ item.remaining }}</span>
                   </div>
                   <div class="ma-1">
-                    <v-btn v-if="item.status === 0" depressed color="error">
+                    <v-btn v-if="item.status === 3" depressed color="error">
                       已过期
                     </v-btn>
                     <v-btn v-else-if="item.remaining === 0" disabled>
@@ -110,15 +110,22 @@
               ></v-text-field>
             </v-col>
             <v-col cols="7">
+              <!--
               <v-select
                 prepend-icon="mdi-map-marker-radius"
-                :items="['达州基地旗杆处', '物资保障部', '生产管理中心']"
+                :items="['默认', '物资保障部']"
                 label="乘车地点"
                 v-model="passenger.pickUpPoint"
                 menu-props="auto"
                 hide-details
                 single-line
               ></v-select>
+              -->
+              <v-switch
+                v-model="isBZB"
+                class="ma-2"
+                label="物资保障部上车"
+              ></v-switch>
             </v-col>
           </v-row>
           <v-row>
@@ -240,7 +247,7 @@ export default {
         department: '',
         phone: '',
         //乘车点
-        pickUpPoint: '达州基地旗杆处'
+        pickUpPoint: ''
       },
       // 随行家属
       ent: '',
@@ -249,7 +256,9 @@ export default {
       alert: {
         toggle: false,
         message: ''
-      }
+      },
+      // 控制物资保障部上车
+      isBZB: false
     }
   },
   methods: {
@@ -412,6 +421,13 @@ export default {
   watch: {
     today() {
       this.refreshBusInfo()
+    },
+    isBZB(val) {
+      if (val) {
+        this.passenger.pickUpPoint = '物资保障部'
+      } else {
+        this.passenger.pickUpPoint = '默认'
+      }
     }
   },
   created() {
