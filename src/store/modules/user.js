@@ -4,10 +4,10 @@ import { Array } from 'core-js'
 const state = {
   //userId: '2014672533791258',
   //userName: '徐聪',
-  // userId: '2069621466776250',
-  // userName: '张博',
-  userId: '',
-  userName: '',
+  userId: '2069621466776250',
+  userName: '张博',
+  // userId: '',
+  // userName: '',
   phone: '',
   department: '',
   shuttleInfos: []

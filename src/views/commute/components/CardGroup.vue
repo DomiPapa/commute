@@ -1,82 +1,97 @@
 <template>
   <div>
     <error-alert :alert="alert" />
-    <v-item-group active-class="primary">
-      <v-container>
-        <v-row>
-          <v-col
-            v-for="(item, index) in resItems"
-            :key="index"
-            cols="12"
-            md="4"
-          >
-            <v-item>
-              <v-card color="#fff" class="pa-2">
-                <v-card-title class="subtitle-1 d-flex ml-2">
-                  <span class="font-weight-bold">
-                    {{ item.departureTime | _2hour }}
-                  </span>
-                  <span class="pl-4">{{ item.departure }}</span>
-                  <span class="pl-2">
-                    <v-icon>{{ mdiArrowRightBold }}</v-icon>
-                  </span>
-                  <span class="pl-2">{{ item.arrival }}</span>
-                </v-card-title>
-                <v-divider :inset="inset"></v-divider>
-                <v-card-text class="ml-2 d-flex justify-space-between">
-                  <div class="d-flex flex-column text-center">
-                    <span>总座位数</span>
-                    <span>{{ item.capacity }}</span>
-                  </div>
-                  <div
-                    class="d-flex flex-column text-center"
-                    @click="checkDetail(item)"
-                  >
-                    <span>剩余座位</span>
-                    <span>{{ item.remaining }}</span>
-                  </div>
-                  <div class="ma-1">
-                    <v-btn v-if="item.status === 3" depressed color="error">
-                      已过期
-                    </v-btn>
-                    <v-btn v-else-if="item.remaining === 0" disabled>
-                      已约满
-                    </v-btn>
-                    <v-btn
-                      class=""
-                      color="primary"
-                      @click="handleRank(item)"
-                      v-else
+    <v-card :loading="data_loading">
+      <v-card max-width="80%" class="loc-bar" :elevation="3">
+        <v-card-text class="d-flex justify-space-around">
+          <div>{{ this.shuttle_loc[0] }}</div>
+          <div>
+            <v-btn icon @click="handleLocChange">
+              <v-icon :class="{ go: rotate, back: !rotate }">mdi-sync</v-icon>
+            </v-btn>
+          </div>
+          <div>{{ this.shuttle_loc[1] }}</div>
+        </v-card-text>
+      </v-card>
+      <v-item-group class="mt-3">
+        <v-container>
+          <v-row>
+            <v-col
+              v-for="(item, index) in resItems"
+              :key="index"
+              cols="12"
+              md="4"
+            >
+              <v-item>
+                <v-card color="#fff" class="pa-2">
+                  <v-card-title class="subtitle-1 d-flex ml-2">
+                    <span class="font-weight-bold">
+                      {{ item.departureTime | _2hour }}
+                    </span>
+                    <span class="pl-4">{{ item.departure }}</span>
+                    <span class="pl-2">
+                      <v-icon>{{ mdiArrowRightBold }}</v-icon>
+                    </span>
+                    <span class="pl-2">{{ item.arrival }}</span>
+                  </v-card-title>
+                  <v-divider :inset="inset"></v-divider>
+                  <v-card-text class="ml-2 d-flex justify-space-between">
+                    <div class="d-flex flex-column text-center">
+                      <span>总座位数</span>
+                      <span>{{ item.capacity }}</span>
+                    </div>
+                    <div
+                      class="d-flex flex-column text-center"
+                      @click="checkDetail(item)"
                     >
-                      预约
-                    </v-btn>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-item>
-          </v-col>
-        </v-row>
-        <!-- 无可用车次时的提示卡 -->
-        <v-card
-          color="#fff"
-          class="pa-2"
-          v-if="this.computedResItems().length === 0"
-        >
-          <v-card-title class="subtitle-1 d-flex ml-2">
-            <v-icon color="red" class="pr-1">mdi-bus-clock</v-icon>
-            <span class="font-weight-bold">
-              很抱歉
-            </span>
-          </v-card-title>
-          <v-divider :inset="inset"></v-divider>
-          <v-card-text class="ml-2 d-flex justify-space-between">
-            <div class="d-flex text-center">
-              <span class="font-weight-bold">当前时间 已无可预约车次</span>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-container>
-    </v-item-group>
+                      <span>剩余座位</span>
+                      <span>{{ item.remaining }}</span>
+                    </div>
+                    <div class="ma-1">
+                      <v-btn v-if="item.status === 3" depressed color="error">
+                        已过期
+                      </v-btn>
+                      <v-btn v-else-if="item.remaining === 0" disabled>
+                        已约满
+                      </v-btn>
+                      <v-btn
+                        class=""
+                        color="primary"
+                        @click="handleRank(item)"
+                        v-else
+                      >
+                        预约
+                      </v-btn>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-item>
+            </v-col>
+          </v-row>
+
+          <!-- 无可用车次时的提示卡 -->
+          <v-card
+            color="#fff"
+            class="pa-2"
+            v-if="this.computedResItems().length === 0"
+          >
+            <v-card-title class="subtitle-1 d-flex ml-2">
+              <v-icon color="red" class="pr-1">mdi-bus-clock</v-icon>
+              <span class="font-weight-bold">
+                很抱歉
+              </span>
+            </v-card-title>
+            <v-divider :inset="inset"></v-divider>
+            <v-card-text class="ml-2 d-flex justify-space-between">
+              <div class="d-flex text-center">
+                <span class="font-weight-bold">未获取到可预约车次</span>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-container>
+      </v-item-group>
+    </v-card>
+
     <!--一级预约对话框-->
     <v-dialog v-model="order_dialog" width="800px">
       <v-card>
@@ -258,10 +273,22 @@ export default {
         message: ''
       },
       // 控制物资保障部上车
-      isBZB: false
+      isBZB: false,
+      // 卡片数据加载展示,
+      data_loading: true,
+      // 地址栏参数切换
+      shuttle_loc: ['达州', '普光'],
+      from_dazhou: true,
+      rotate: false
     }
   },
   methods: {
+    handleLocChange() {
+      console.log('切换乘车点')
+      this.rotate = !this.rotate
+      this.shuttle_loc = [this.shuttle_loc[1], this.shuttle_loc[0]]
+      this.from_dazhou = !this.from_dazhou
+    },
     // 计算当日应显示的班车信息
     computedResItems() {
       /*
@@ -381,6 +408,7 @@ export default {
     },
     async refreshBusInfo() {
       try {
+        this.data_loading = true
         this.items = await store.dispatch('bus_info/fetchBusInfo')
         /*
         // 刷一下时间
@@ -395,6 +423,7 @@ export default {
         */
         // 设置卡片信息
         this.resItems = this.computedResItems()
+        this.data_loading = false
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
         this.alert.toggle = true
@@ -436,4 +465,18 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.loc-bar {
+  position: relative;
+  top: -25px;
+  left: 10%;
+  margin-bottom: -25px;
+}
+.back {
+  transition: all 0.5s;
+}
+.go {
+  transform: rotate(180deg);
+  transition: all 0.5s;
+}
+</style>

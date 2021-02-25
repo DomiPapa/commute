@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mb-10">
     <v-alert
       v-model="alert.toggle"
       border="left"
@@ -32,3 +32,4 @@ export default {
   computed: {}
 }
 </script>
+<style lang="sass"></style>

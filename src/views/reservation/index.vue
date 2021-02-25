@@ -151,13 +151,21 @@
     <v-dialog v-model="qrcode_dialog">
       <v-card @click="qrcode_dialog = false">
         <v-card-title class="headline text-center">
-          发车时间前后30分钟内可用
+          请上车
         </v-card-title>
 
         <v-card-text class="teal accent-3 pt-4">
           <div class="">
             <Qrcode sid="url" :text="codeText" :swidth="swidth"></Qrcode>
           </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    <!--二维码无法显示提示框-->
+    <v-dialog v-model="no_qrcode_dialog" max-width="300">
+      <v-card @click="no_qrcode_dialog = false">
+        <v-card-text class="pa-4 red headline text-center">
+          乘车通行码发车时间前后30分钟内可用
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -195,6 +203,7 @@ export default {
       baseurl: process.env.BASE_URL,
       // qrcode
       qrcode_dialog: false,
+      no_qrcode_dialog: false,
       url: '',
       codeText: ''
     }
@@ -240,8 +249,6 @@ export default {
     },
     // 显示二维码
     showQrcode(item) {
-      console.log(item)
-
       // 发车时间差
       let res_time = moment(item.departureTime, 'YYYY-MM-DD HH:mm:ss').diff(
         moment(),
@@ -250,8 +257,9 @@ export default {
       if (Math.abs(res_time) <= 30) {
         console.log('时间前后不足30')
         this.qrcode_dialog = true
+      } else {
+        this.no_qrcode_dialog = true
       }
-      // this.qrcode_dialog = true
     }
   },
   created() {
