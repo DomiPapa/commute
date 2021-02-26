@@ -1,13 +1,17 @@
 <template>
   <div>
     <error-alert :alert="alert" />
-    <v-card :loading="data_loading">
+    <v-card>
       <v-card max-width="80%" class="loc-bar" :elevation="3">
-        <v-card-text class="d-flex justify-space-around">
+        <v-card-text
+          class="d-flex justify-space-around align-content-center text-h6 font-weight-bold"
+        >
           <div>{{ this.shuttle_loc[0] }}</div>
           <div>
             <v-btn icon @click="handleLocChange">
-              <v-icon :class="{ go: rotate, back: !rotate }">mdi-sync</v-icon>
+              <v-icon large color="cyan" :class="{ go: rotate, back: !rotate }">
+                mdi-sync
+              </v-icon>
             </v-btn>
           </div>
           <div>{{ this.shuttle_loc[1] }}</div>
@@ -24,28 +28,16 @@
             >
               <v-item>
                 <v-card color="#fff" class="pa-2">
-                  <v-card-title class="subtitle-1 d-flex ml-2">
-                    <span class="font-weight-bold">
+                  <v-card-text class="d-flex justify-space-between">
+                    <div class="text-center font-weight-bold text-h6">
                       {{ item.departureTime | _2hour }}
-                    </span>
-                    <span class="pl-4">{{ item.departure }}</span>
-                    <span class="pl-2">
-                      <v-icon>{{ mdiArrowRightBold }}</v-icon>
-                    </span>
-                    <span class="pl-2">{{ item.arrival }}</span>
-                  </v-card-title>
-                  <v-divider :inset="inset"></v-divider>
-                  <v-card-text class="ml-2 d-flex justify-space-between">
-                    <div class="d-flex flex-column text-center">
-                      <span>总座位数</span>
-                      <span>{{ item.capacity }}</span>
                     </div>
                     <div
                       class="d-flex flex-column text-center"
                       @click="checkDetail(item)"
                     >
-                      <span>剩余座位</span>
-                      <span>{{ item.remaining }}</span>
+                      <span class="font-weight-bold">剩余座位</span>
+                      <span>{{ item.remaining }}/{{ item.capacity }}</span>
                     </div>
                     <div class="ma-1">
                       <v-btn v-if="item.status === 3" depressed color="error">
@@ -70,11 +62,7 @@
           </v-row>
 
           <!-- 无可用车次时的提示卡 -->
-          <v-card
-            color="#fff"
-            class="pa-2"
-            v-if="this.computedResItems().length === 0"
-          >
+          <v-card color="#fff" class="pa-2" v-if="resItems.length === 0">
             <v-card-title class="subtitle-1 d-flex ml-2">
               <v-icon color="red" class="pr-1">mdi-bus-clock</v-icon>
               <span class="font-weight-bold">
@@ -95,9 +83,17 @@
     <!--一级预约对话框-->
     <v-dialog v-model="order_dialog" width="800px">
       <v-card>
-        <v-card-title class="">
-          填写乘车人信息
+        <v-card-title v-if="current_item" class="subtitle-1 d-flex ml-2">
+          <span class="font-weight-bold">
+            {{ current_item.departureTime | _2Date }}
+          </span>
+          <span class="pl-4">{{ current_item.departure }}</span>
+          <span class="pl-2">
+            <v-icon>{{ mdiArrowRightBold }}</v-icon>
+          </span>
+          <span class="pl-2">{{ current_item.arrival }}</span>
         </v-card-title>
+        <v-divider :inset="inset"></v-divider>
         <v-container>
           <v-row>
             <v-col cols="5">
@@ -137,7 +133,8 @@
               ></v-select>
               -->
               <v-switch
-                v-model="isBZB"
+                v-if="is_from_dazhou"
+                v-model="is_wzbzb"
                 class="ma-2"
                 label="物资保障部上车"
               ></v-switch>
@@ -227,6 +224,19 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!--进度条对话框-->
+    <v-dialog v-model="loading_dialog" hide-overlay persistent width="300">
+      <v-card color="cyan" dark>
+        <v-card-text>
+          正在加载...
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
@@ -243,6 +253,9 @@ export default {
   filters: {
     _2hour: function(time_pram) {
       return moment(time_pram, 'YYYY-MM-DD HH:mm:ss').format('HH:mm')
+    },
+    _2Date: function(time_pram) {
+      return moment(time_pram, 'YYYY-MM-DD HH:mm:ss').format('MM-DD HH:mm')
     }
   },
   props: {
@@ -267,19 +280,20 @@ export default {
       // 随行家属
       ent: '',
       entourage: [],
+      // 正在操作的乘车卡
       current_item: null,
       alert: {
         toggle: false,
         message: ''
       },
       // 控制物资保障部上车
-      isBZB: false,
-      // 卡片数据加载展示,
-      data_loading: true,
+      is_wzbzb: false,
       // 地址栏参数切换
       shuttle_loc: ['达州', '普光'],
-      from_dazhou: true,
-      rotate: false
+      is_from_dazhou: true,
+      rotate: false,
+      // 进度条对话框
+      loading_dialog: false
     }
   },
   methods: {
@@ -287,38 +301,39 @@ export default {
       console.log('切换乘车点')
       this.rotate = !this.rotate
       this.shuttle_loc = [this.shuttle_loc[1], this.shuttle_loc[0]]
-      this.from_dazhou = !this.from_dazhou
+      this.is_from_dazhou = !this.is_from_dazhou
     },
     // 计算当日应显示的班车信息
     computedResItems() {
-      /*
-      let shuttleInfos = store.getters.shuttleInfos
-      let resArr = []
-      this.items.forEach(el => {
-        let eObj = Object.assign({}, el)
-        shuttleInfos.forEach(sEl => {
-          if (sEl.shuttleId === eObj.id) {
-            eObj.orderId = sEl.orderId
-          }
-        })
-        resArr.push(eObj)
-      })
-      return resArr
-      */
+      let midArr = []
       let resArr = []
       this.items.forEach(el => {
         if (this.today) {
           if (el.status != 2) {
             let eObj = Object.assign({}, el)
-            resArr.push(eObj)
+            midArr.push(eObj)
           }
         } else {
           if (el.status === 2) {
             let eObj = Object.assign({}, el)
-            resArr.push(eObj)
+            midArr.push(eObj)
           }
         }
       })
+      // 根据目的地进行二次筛选
+      if (this.is_from_dazhou) {
+        midArr.forEach(el => {
+          if (el.departure === '达州') {
+            resArr.push(el)
+          }
+        })
+      } else {
+        midArr.forEach(el => {
+          if (el.departure === '普光') {
+            resArr.push(el)
+          }
+        })
+      }
       return resArr
     },
     // 处理点击预约的逻辑，若当前id存在该班次约车信息则不允许继续约
@@ -389,15 +404,6 @@ export default {
 
       updateOrderSubmit(reservations_arr).then(res => {
         console.log(res.data.msg)
-        /*
-        if (res.data.code === 10000) {
-          dd.device.notification.alert({
-            message: '预约成功',
-            title: '', //可传空
-            buttonName: '收到'
-          })
-        }
-        */
         // 预约成功后从新刷新一下视图
         this.refreshBusInfo()
       })
@@ -408,22 +414,11 @@ export default {
     },
     async refreshBusInfo() {
       try {
-        this.data_loading = true
+        this.loading_dialog = true
         this.items = await store.dispatch('bus_info/fetchBusInfo')
-        /*
-        // 刷一下时间
-        this.$store.dispatch('rank_info/handleDate')
-        // 刷一下用户订单信息
-        await this.$store.dispatch('user/fetchUserReservationInfo', {
-          uid: store.getters.userId,
-          startTime: store.getters.reservationDateInfo.startTime,
-          endTime: store.getters.reservationDateInfo.endTime
-        })
-        console.log('刷新执行完成')
-        */
         // 设置卡片信息
         this.resItems = this.computedResItems()
-        this.data_loading = false
+        this.loading_dialog = false
       } catch (error) {
         console.log('create阶段捕捉的错误' + error)
         this.alert.toggle = true
@@ -451,12 +446,26 @@ export default {
     today() {
       this.refreshBusInfo()
     },
-    isBZB(val) {
-      if (val) {
+    is_wzbzb(newVal) {
+      if (newVal) {
         this.passenger.pickUpPoint = '物资保障部'
       } else {
         this.passenger.pickUpPoint = '默认'
       }
+    },
+    is_from_dazhou() {
+      this.refreshBusInfo()
+    },
+    alert: {
+      // 提示框自动关闭
+      handler: function(val) {
+        if (val.toggle) {
+          setTimeout(() => {
+            this.alert.toggle = false
+          }, 10000)
+        }
+      },
+      deep: true
     }
   },
   created() {

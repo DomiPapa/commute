@@ -83,6 +83,10 @@
         </div>
       </v-card-text>
     </v-card>
+    <!-- 分页组件 -->
+    <div class="text-center">
+      <v-pagination v-model="page" :length="3" circle></v-pagination>
+    </div>
     <!--退订对话框-->
     <v-dialog v-model="cancel_dialog" max-width="400">
       <v-card>
@@ -205,7 +209,9 @@ export default {
       qrcode_dialog: false,
       no_qrcode_dialog: false,
       url: '',
-      codeText: ''
+      codeText: '',
+      // 分页
+      page: 1
     }
   },
   computed: {
