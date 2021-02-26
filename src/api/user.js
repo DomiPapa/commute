@@ -14,3 +14,13 @@ export function fetchUserReservationInfo(query) {
     params: query
   })
 }
+
+// 按分页请求数据
+
+export function fetchUserReservationInfoByPages(query) {
+  return request({
+    url: '/reservation/findByUser',
+    method: 'get',
+    params: query
+  })
+}

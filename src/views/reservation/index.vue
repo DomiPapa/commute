@@ -13,17 +13,10 @@
             <v-item>
               <v-card color="#fff" class="pa-2">
                 <v-card-title
-                  class="subtitle-1 d-flex  justify-space-between ml-2"
+                  class="text-h6 d-flex  justify-space-between ml-2"
                 >
                   <div class="font-weight-bold">
                     {{ item.departureTime | _2dayhour }}
-                  </div>
-                  <div>
-                    <span>{{ item.departure }}</span>
-                    <span class="pl-2">
-                      <v-icon>{{ mdiArrowRightBold }}</v-icon>
-                    </span>
-                    <span class="pl-2">{{ item.arrival }}</span>
                   </div>
                   <div @click="showQrcode(item)">
                     <v-avatar tile color="blue">
@@ -35,27 +28,22 @@
                   </div>
                 </v-card-title>
                 <v-divider :inset="inset"></v-divider>
-                <v-card-text>
-                  <v-row>
-                    <v-col cols="8">
-                      <v-row>
-                        <v-col cols="4">姓名</v-col>
-                        <v-col cols="8">{{ item.name }}</v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="4">地点</v-col>
-                        <v-col cols="8">{{ item.pickUpPoint }}</v-col>
-                      </v-row>
-                    </v-col>
-                    <v-col
-                      cols="4"
-                      class="d-flex flex-column-reverse align-end"
-                    >
-                      <v-btn depressed color="error" @click="cancelRank(item)">
-                        退订
-                      </v-btn>
-                    </v-col>
-                  </v-row>
+                <v-card-text class="ml-2 d-flex justify-space-between text-end">
+                  <div class="font-weight-bold text-subtitle-1">
+                    {{ item.name }}
+                  </div>
+                  <div class="text-subtitle-1">
+                    <span>{{ item.departure }}</span>
+                    <span class="pl-2">
+                      <v-icon>{{ mdiArrowRightBold }}</v-icon>
+                    </span>
+                    <span class="pl-2">{{ item.arrival }}</span>
+                  </div>
+                  <div>
+                    <v-btn depressed color="error" @click="cancelRank(item)">
+                      退订
+                    </v-btn>
+                  </div>
                 </v-card-text>
               </v-card>
             </v-item>
@@ -85,7 +73,12 @@
     </v-card>
     <!-- 分页组件 -->
     <div class="text-center">
-      <v-pagination v-model="page" :length="3" circle></v-pagination>
+      <v-pagination
+        v-model="current_page"
+        :length="max_length"
+        :total-visible="5"
+        circle
+      ></v-pagination>
     </div>
     <!--退订对话框-->
     <v-dialog v-model="cancel_dialog" max-width="400">
@@ -182,6 +175,7 @@ import store from '@/store'
 import ErrorAlert from '@/components/ErrorAlert'
 import { mdiArrowRightBold } from '@mdi/js'
 import { updateOrderCancel } from '@/api/rank-info.js'
+import { fetchUserReservationInfoByPages } from '@/api/user.js'
 export default {
   name: 'Reservation',
   components: {
@@ -211,7 +205,8 @@ export default {
       url: '',
       codeText: '',
       // 分页
-      page: 1
+      current_page: 1,
+      max_length: 1
     }
   },
   computed: {
@@ -235,10 +230,12 @@ export default {
       )
       updateOrderCancel(tempData).then(res => {
         console.log(res.data.msg)
-        this.refreshReservationInfo()
+        // this.refreshReservationInfo()
+        this.refreshReservationInfoByPages()
       })
       this.cancel_dialog = false
     },
+    // 旧的方法,不分页 只显示时间没到的车次
     async refreshReservationInfo() {
       try {
         this.reservation_items = await store.dispatch(
@@ -252,6 +249,48 @@ export default {
         this.alert.toggle = true
         this.alert.message = '服务器拉取用户订车数据异常'
       }
+    },
+    // 新的方法,分页显示车次（所有订过的车次）
+    refreshReservationInfoByPages() {
+      let paramsObj = {
+        uid: store.getters.userId,
+        currentPage: this.current_page,
+        pageSize: 3
+      }
+      fetchUserReservationInfoByPages(paramsObj)
+        .then(result => {
+          let reservation_result_arr = []
+          const {
+            content: reservation_arr,
+            totalElements,
+            totalPages
+          } = result.data.data
+          console.log(reservation_arr)
+          console.log(totalElements)
+          console.log(totalPages)
+          this.max_length = totalPages
+          reservation_arr.forEach(el => {
+            let elObj = {}
+            elObj.shuttleId = el.shuttle.sid
+            elObj.orderId = el.rid
+            elObj.department = el.department
+            elObj.name = el.name
+            elObj.pickUpPoint = el.pickUpPoint
+            elObj.reserveTime = el.reserveTime
+            elObj.arrival = el.shuttle.arrival
+            elObj.departure = el.shuttle.departure
+            elObj.departureTime = el.shuttle.departureTime
+            elObj.remaining = el.shuttle.remaining
+            reservation_result_arr.push(elObj)
+          })
+          // 直接刷新显示内容把
+          this.reservation_items = reservation_result_arr
+        })
+        .catch(err => {
+          console.log(err)
+          this.alert.toggle = true
+          this.alert.message = '服务器拉取用户订车数据异常'
+        })
     },
     // 显示二维码
     showQrcode(item) {
@@ -268,8 +307,27 @@ export default {
       }
     }
   },
+  watch: {
+    current_page(page) {
+      // 页面变更，立即请求
+      console.log(page)
+      this.refreshReservationInfoByPages()
+    },
+    alert: {
+      // 提示框自动关闭
+      handler: function(val) {
+        if (val.toggle) {
+          setTimeout(() => {
+            this.alert.toggle = false
+          }, 10000)
+        }
+      },
+      deep: true
+    }
+  },
   created() {
-    this.refreshReservationInfo()
+    // this.refreshReservationInfo()
+    this.refreshReservationInfoByPages()
   }
 }
 </script>
