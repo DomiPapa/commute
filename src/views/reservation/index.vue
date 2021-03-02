@@ -40,7 +40,15 @@
                     <span class="pl-2">{{ item.arrival }}</span>
                   </div>
                   <div>
-                    <v-btn depressed color="error" @click="cancelRank(item)">
+                    <v-btn v-if="item.status === 2" disabled>
+                      已发
+                    </v-btn>
+                    <v-btn
+                      v-else
+                      depressed
+                      color="error"
+                      @click="cancelRank(item)"
+                    >
                       退订
                     </v-btn>
                   </div>
@@ -231,6 +239,8 @@ export default {
       updateOrderCancel(tempData).then(res => {
         console.log(res.data.msg)
         // this.refreshReservationInfo()
+        // 重新回到第一页并刷新结果
+        this.current_page = 1
         this.refreshReservationInfoByPages()
       })
       this.cancel_dialog = false
@@ -271,6 +281,7 @@ export default {
           this.max_length = totalPages
           reservation_arr.forEach(el => {
             let elObj = {}
+            elObj.status = el.status
             elObj.shuttleId = el.shuttle.sid
             elObj.orderId = el.rid
             elObj.department = el.department

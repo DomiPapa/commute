@@ -41,10 +41,10 @@
                     </div>
                     <div class="ma-1">
                       <v-btn v-if="item.status === 3" depressed color="error">
-                        已过期
+                        已发
                       </v-btn>
                       <v-btn v-else-if="item.remaining === 0" disabled>
-                        已约满
+                        约满
                       </v-btn>
                       <v-btn
                         class=""
