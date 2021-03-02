@@ -279,21 +279,24 @@ export default {
           console.log(totalElements)
           console.log(totalPages)
           this.max_length = totalPages
-          reservation_arr.forEach(el => {
-            let elObj = {}
-            elObj.status = el.status
-            elObj.shuttleId = el.shuttle.sid
-            elObj.orderId = el.rid
-            elObj.department = el.department
-            elObj.name = el.name
-            elObj.pickUpPoint = el.pickUpPoint
-            elObj.reserveTime = el.reserveTime
-            elObj.arrival = el.shuttle.arrival
-            elObj.departure = el.shuttle.departure
-            elObj.departureTime = el.shuttle.departureTime
-            elObj.remaining = el.shuttle.remaining
-            reservation_result_arr.push(elObj)
-          })
+          if (Array.isArray(reservation_arr) && reservation_arr.length !== 0) {
+            reservation_arr.forEach(el => {
+              let elObj = {}
+              elObj.status = el.status
+              elObj.shuttleId = el.shuttle.sid
+              elObj.orderId = el.rid
+              elObj.department = el.department
+              elObj.name = el.name
+              elObj.pickUpPoint = el.pickUpPoint
+              elObj.reserveTime = el.reserveTime
+              elObj.arrival = el.shuttle.arrival
+              elObj.departure = el.shuttle.departure
+              elObj.departureTime = el.shuttle.departureTime
+              elObj.remaining = el.shuttle.remaining
+              reservation_result_arr.push(elObj)
+            })
+          }
+
           // 直接刷新显示内容把
           this.reservation_items = reservation_result_arr
         })
