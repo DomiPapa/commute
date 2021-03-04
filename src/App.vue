@@ -13,9 +13,9 @@ export default {
   data() {
     return {
       // 生产用
-      userId: ''
+      // userId: ''
       // 调试用（张博的ID）
-      // userId: '2069621466776250'
+      userId: '2069621466776250'
     }
   },
   computed: {
@@ -76,7 +76,7 @@ export default {
   created() {
     console.log('Appcreated')
     // 处理钉钉获取逻辑
-    this.handleDD()
+    // this.handleDD()
   }
 }
 </script>

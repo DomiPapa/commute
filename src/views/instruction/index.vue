@@ -26,7 +26,7 @@ export default {
         sources: [
           {
             type: 'video/mp4', // 类型
-            src: 'http://8.131.89.39:8008/video/1.mp4' // url地址
+            src: 'http://8.131.89.39:8008/video/1.mp4?version=1' // url地址
           }
         ],
         poster: `${process.env.BASE_URL}poster.jpg`, // 封面地址
